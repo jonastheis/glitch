@@ -1,9 +1,17 @@
 .idea
 .DS_STORE
 
-playground/cmake-build-*
+# Playground specific
 playground/libraries
 playground/Makefile
 playground/glitch
-*.a
 CMakeFiles
+
+# Clion
+cmake-build-*
+
+# C specific files
+*.o
+*.d
+*.a
+*.out
