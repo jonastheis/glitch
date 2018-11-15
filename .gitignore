@@ -1,2 +1,8 @@
 .idea
 .DS_STORE
+cmake-build-debug
+
+# C specific files
+*.o
+*.d
+*.out
