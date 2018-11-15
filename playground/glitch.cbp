@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="glitch"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\libraries\;CMake Files\libraries\glfw\;CMake Files\libraries\glfw\CMake\;CMake Files\libraries\glfw\CMake\modules\;CMake Files\libraries\glfw\src\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glad">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libglad.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glad/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 glad"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glad/fast">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libglad.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glad/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 glad/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glitch">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/glitch" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGLFW_INCLUDE_NONE"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/source"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glad/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 glitch"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glitch/fast">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/glitch" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGLFW_INCLUDE_NONE"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/source"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glad/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 glitch/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glfw">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/libglfw3.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D_GLFW_USE_CONFIG_H"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 glfw"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="glfw/fast">
+				<Option output="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/libglfw3.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D_GLFW_USE_CONFIG_H"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include"/>
+					<Add directory="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 glfw/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glad/src/glad.c">
+			<Option target="glad"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include/GLFW/glfw3.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/include/GLFW/glfw3native.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_init.m">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_joystick.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_joystick.m">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_monitor.m">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_platform.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_time.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/cocoa_window.m">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/context.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/glfw_config.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/init.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/input.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/internal.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/monitor.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/nsgl_context.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/nsgl_context.m">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/posix_tls.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/posix_tls.h">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/vulkan.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/window.c">
+			<Option target="glfw"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/source/main.c">
+			<Option target="glitch"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\libraries\glfw\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/CMake/modules/FindVulkan.cmake">
+			<Option virtualFolder="CMake Files\libraries\glfw\CMake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\libraries\glfw\src\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/glfw3.pc.in">
+			<Option virtualFolder="CMake Files\libraries\glfw\src\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/glfw3Config.cmake.in">
+			<Option virtualFolder="CMake Files\libraries\glfw\src\"/>
+		</Unit>
+		<Unit filename="/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/libraries/glfw/src/glfw_config.h.in">
+			<Option virtualFolder="CMake Files\libraries\glfw\src\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

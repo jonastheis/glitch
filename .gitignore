@@ -1,2 +1,9 @@
 .idea
 .DS_STORE
+
+playground/cmake-build-*
+playground/libraries
+playground/Makefile
+playground/glitch
+*.a
+CMakeFiles
