@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <stdio.h>
+#include "shader.cpp"
 
 GLFWwindow* window;
 
@@ -137,7 +137,8 @@ int main(int argc, char* argv[]) {
 
     glViewport(0, 0, 800, 600);
 
-
+    // create a new shader class just to test
+    Shader shader("./shaders/tr.vs", "./shaders/tr.fs");
     triangle();
 
 
