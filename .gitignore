@@ -6,6 +6,8 @@ playground/libraries
 playground/Makefile
 playground/glitch
 CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
 
 # Clion
 cmake-build-*
@@ -15,3 +17,4 @@ cmake-build-*
 *.d
 *.a
 *.out
+*.cbp
