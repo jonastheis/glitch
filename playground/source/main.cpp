@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include "shader.cpp"
 
+#define WINDOW_WIDTH 32
+#define WINDOW_HEIGHT 32
+
 GLFWwindow* window;
 
 void triangle() {
@@ -30,8 +33,8 @@ void triangle() {
     glEnableVertexAttribArray(0);
 
     Shader shader(
-        "/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/source/shaders/tr.vs",
-        "/Users/Kian/Desktop/VU/P8/HardwareSecurity/Docker-Storage/glitch/playground/source/shaders/tr.fs");
+        "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.vs",
+        "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.fs");
     while(!glfwWindowShouldClose(window))
     {
         // possibly evaluate inputs
@@ -51,6 +54,54 @@ void triangle() {
 
 }
 
+void debugger() {
+    // allocate framebuffer with texture
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // generate texture
+    unsigned int texColorBuffer;
+    glGenTextures(1, &texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // attach it to currently bound framebuffer object
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+    // Render to our framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    }
+
+    Shader shader(
+            "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.vs",
+            "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.fs");
+
+    // execute
+    glClearColor(.5, .5, .5, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    shader.use();
+
+    // allocate data in memory
+    unsigned char *data = (unsigned char*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT *4);
+    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    for (int i = 0; i <WINDOW_WIDTH; ++i) {
+        for (int j = 0; j < WINDOW_HEIGHT; ++j) {
+            printf("%d ", data[i+j*WINDOW_WIDTH]);
+        }
+        printf("\n");
+    }
+}
+
 int main(int argc, char* argv[]) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -59,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         printf("Failed to create GLFW window\n");
@@ -74,9 +125,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    triangle();
+    debugger();
 
 
     glfwTerminate();
