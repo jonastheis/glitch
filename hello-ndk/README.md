@@ -36,3 +36,16 @@ adb shell
 cd /data/exec-test/
 ./hello.out
 ```
+
+### Useful when coding
+
+```bash
+NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk && adb push obj/local/x86/hello.out /data/exec-test/hello.out
+```
+
+
+### Resources 
+
+- https://developer.android.com/ndk/guides/stable_apis#ogles-3
+- https://stackoverflow.com/questions/18529021/android-initialise-opengl2-0-context-with-egl
+- https://stackoverflow.com/questions/49212540/android-ndk-opengles-not-rendering-triangles

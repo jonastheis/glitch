@@ -1,7 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <iostream>
 #include "shader.cpp"
+
+using namespace std;
 
 #define WINDOW_WIDTH 32
 #define WINDOW_HEIGHT 32
