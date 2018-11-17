@@ -14,7 +14,6 @@ You can insert this function in your program however you want.
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-
 EGLDisplay display;
 EGLSurface pBuffer;
 EGLContext ctx;

@@ -1,7 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <iostream>
 #include "shader.cpp"
+
+using namespace std;
 
 GLFWwindow* window;
 
@@ -77,7 +80,6 @@ int main(int argc, char* argv[]) {
     glViewport(0, 0, 800, 600);
 
     triangle();
-
 
     glfwTerminate();
     return 0;
