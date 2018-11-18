@@ -29,3 +29,9 @@ Finally, libraries folder should be like this:
 
 - run `cmake . ` and then `make` in the source folder
 - or open in clion
+
+
+# Useful OpenGL resources
+
+- https://paroj.github.io/gltut/Texturing/Tutorial%2014.html
+- https://learnopengl.com/Getting-started/Textures

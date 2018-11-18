@@ -1,7 +1,9 @@
 #version 330 core
-out vec4 FragColor;
+out uvec4 FragColor;
+
+uniform usampler2D dataTexture;
 
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);;
+    FragColor = uvec4(15, uvec3(1));
 }

@@ -57,26 +57,92 @@ void triangle() {
 
 }
 
-void debugger() {
-    // allocate framebuffer with texture
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+void createRectangle(unsigned int *VAO) {
+    // prepare rectangle
+    float vertices[] = {
+            1,  1, 0.0f,  // top right
+            1, -1, 0.0f,  // bottom right
+            -1, -1, 0.0f,  // bottom left
+            -1,  1, 0.0f   // top left
+    };
+    unsigned int indices[] = {  // note that we start from 0!
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
+    };
+    unsigned int VBO, EBO;
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(*VAO);
 
-    // generate texture
-    unsigned int texColorBuffer;
-    glGenTextures(1, &texColorBuffer);
-    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+}
+
+void rectangle() {
+    unsigned int VAO;
+    createRectangle(&VAO);
+
+    Shader shader(
+            "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.vs",
+            "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.fs");
+    while(!glfwWindowShouldClose(window))
+    {
+        // possibly evaluate inputs
+
+        // render commands
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.use();
+        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // check and call events and swap buffers
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+}
+
+void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
 
+void debugger() {
+    uint32_t rndX = (uint32_t)(rand() % 32);
+    uint32_t rndY = (uint32_t)(rand() % 32);
+    uint32_t result = rndX + rndY;
+
+
+    // generate textures
+    GLuint textures[2];
+    glGenTextures(2, (GLuint*)&textures);
+
+
+    // allocate framebuffer with texture
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // set up framebuffer & attached texture
+    unsigned int texColorBuffer = textures[0];
+    createTexture2DUI32(texColorBuffer, NULL);
     // attach it to currently bound framebuffer object
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
-
     // Render to our framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -84,22 +150,42 @@ void debugger() {
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
     }
 
+
+    // create rectangle
+    unsigned int VAO;
+    createRectangle(&VAO);
+
+
+    // create data texture and pass as uniform to shader
+    unsigned int texData = textures[1];
+    uint32_t *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    memset(data, 0x41, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    createTexture2DUI32(texData, data);
+    // write values to texture
+    printf("%u, %u\n", rndX, rndY);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, rndX, rndY, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
+
+
     Shader shader(
             "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.vs",
             "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.fs");
 
     // execute
-    glClearColor(.5, .5, .5, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(.5, .5, .5, 1.0f);
+    //glClear(GL_COLOR_BUFFER_BIT);
     shader.use();
 
+    // draw rectangle
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
     // allocate data in memory
-    unsigned char *data = (unsigned char*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT *4);
-    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
+    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
 
     for (int i = 0; i <WINDOW_WIDTH; ++i) {
         for (int j = 0; j < WINDOW_HEIGHT; ++j) {
-            printf("%d ", data[i+j*WINDOW_WIDTH]);
+            printf("%u ", exportData[i+j*WINDOW_WIDTH]);
         }
         printf("\n");
     }
