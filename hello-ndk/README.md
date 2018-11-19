@@ -34,13 +34,13 @@ adb push obj/local/x86/hello.out /data/exec-test/hello.out
 
 adb shell
 cd /data/exec-test/
-./hello.out
+./main.out
 ```
 
-### Useful when coding
+### All in one command to compile, transfer and execute
 
 ```bash
-NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk && adb push obj/local/x86/hello.out /data/exec-test/hello.out
+./prun-it
 ```
 
 
@@ -49,3 +49,4 @@ NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk && adb push obj
 - https://developer.android.com/ndk/guides/stable_apis#ogles-3
 - https://stackoverflow.com/questions/18529021/android-initialise-opengl2-0-context-with-egl
 - https://stackoverflow.com/questions/49212540/android-ndk-opengles-not-rendering-triangles
+- https://android.googlesource.com/platform/hardware/qcom/display/+/3072e9633b6cb400ebe0414a7f5f9233920cfd7a/msm8996/libmemtrack/kgsl.c

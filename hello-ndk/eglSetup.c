@@ -8,11 +8,13 @@ the required configurations.
 You can insert this function in your program however you want. 
 
 ***************************************************************/
-
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+
 
 EGLDisplay display;
 EGLSurface pBuffer;
@@ -32,7 +34,7 @@ void egl_setup() {
         exit(-1);
     }
 
-    printf("EGL v%i.%i initialized\n", maj, min);
+    printf("+ EGL v%i.%i initialized.\n", maj, min);
 
     EGLint attribs[] =
     {
@@ -73,6 +75,7 @@ void egl_setup() {
         printf("Could not get native visual ID from chosen config\n");
     }
     eglBindAPI(EGL_OPENGL_ES_API);
+
 
     pBuffer = eglCreatePbufferSurface(display, config, pBuffer_attribs);
     ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attribs);
