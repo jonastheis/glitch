@@ -9,6 +9,9 @@ CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
 
+obj/
+libs/
+
 # Clion
 cmake-build-*
 
