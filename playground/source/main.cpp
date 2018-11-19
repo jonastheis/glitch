@@ -126,6 +126,7 @@ void debugger() {
     uint32_t rndX = (uint32_t)(rand() % 32);
     uint32_t rndY = (uint32_t)(rand() % 32);
     uint32_t result = rndX + rndY;
+    printf("rnd(%u, %u), result=%u\n", rndX, rndY, result);
 
 
     // generate textures
@@ -162,18 +163,24 @@ void debugger() {
     memset(data, 0x41, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
     createTexture2DUI32(texData, data);
     // write values to texture
-    printf("%u, %u\n", rndX, rndY);
+    glBindTexture(GL_TEXTURE_2D, texData);
     glTexSubImage2D(GL_TEXTURE_2D, 0, rndX, rndY, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 
     Shader shader(
             "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.vs",
             "/Users/jonastheis/projects/vu/hwsec/glitch/playground/source/shaders/tr.fs");
 
+    // initialize (rndX, rndY) as uniform
+    int vertexRndLocation = glGetUniformLocation(shader.ID, "rnd");
+
     // execute
-    //glClearColor(.5, .5, .5, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT);
     shader.use();
+    // set uniforms
+    glUniform2ui(vertexRndLocation, rndX, rndY);
+    glBindTexture(GL_TEXTURE_2D, texData);
+
 
     // draw rectangle
     glBindVertexArray(VAO);
