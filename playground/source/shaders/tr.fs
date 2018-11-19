@@ -1,7 +1,11 @@
 #version 330 core
-out vec4 FragColor;
+out uvec4 FragColor;
+
+uniform usampler2D dataTexture;
+uniform uvec2 rnd;
 
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);;
+    // fetch value at position of rnd and set for every fragment
+    FragColor = texelFetch(dataTexture, ivec2(rnd), 0);
 }
