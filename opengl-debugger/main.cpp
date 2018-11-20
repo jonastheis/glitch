@@ -129,9 +129,9 @@ void createRectangle() {
  * @param textureId the id of the texture
  * @param data the data for the texture (can be NULL)
  */
-void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
+void createTexture2DUI32(unsigned int textureId, uint16_t *data) {
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -140,12 +140,12 @@ void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
 }
 
 /**
- * View every pixel of the framebuffer (contains uint32_t values)
+ * View every pixel of the framebuffer (contains uint16_t values)
  */
 void viewFrameBuffer() {
     // allocate data in memory
-    uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
-    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
+    auto *exportData = (uint16_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint16_t));
+    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_SHORT, exportData);
 
     for (int i = 0; i <WINDOW_WIDTH; ++i) {
         for (int j = 0; j < WINDOW_HEIGHT; ++j) {
@@ -157,9 +157,9 @@ void viewFrameBuffer() {
 
 void debugger() {
     // create random values to be populated in framebuffer via shader
-    uint32_t rndX = (uint32_t)(rand() % 32);
-    uint32_t rndY = (uint32_t)(rand() % 32);
-    uint32_t result = rndX + rndY;
+    short rndX = (short)(rand() % 32);
+    short rndY = (short)(rand() % 32);
+    uint16_t result = rndX + rndY;
     printf("rnd(%u, %u), result=%u\n", rndX, rndY, result);
 
 
@@ -207,18 +207,18 @@ void debugger() {
 
     // create data texture
     unsigned int texData = textures[1];
-    uint32_t *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
-    memset(data, 0x41, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    auto *data = (uint16_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint16_t));
+    memset(data, 0x41, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint16_t));
     createTexture2DUI32(texData, data);
     // write special values to texture
     glBindTexture(GL_TEXTURE_2D, texData);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, rndX, rndY, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, rndX, rndY, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_SHORT, &result);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // execute
     shader.use();
     // set uniforms
-    glUniform2ui(vertexRndLocation, rndX, rndY);
+    glUniform2i(vertexRndLocation, rndX, rndY);
     glBindTexture(GL_TEXTURE_2D, texData);
 
 
