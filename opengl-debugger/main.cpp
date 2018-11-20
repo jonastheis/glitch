@@ -144,7 +144,7 @@ void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
  */
 void viewFrameBuffer() {
     // allocate data in memory
-    uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
+    auto *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
     glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
 
     for (int i = 0; i <WINDOW_WIDTH; ++i) {
@@ -157,8 +157,8 @@ void viewFrameBuffer() {
 
 void debugger() {
     // create random values to be populated in framebuffer via shader
-    uint32_t rndX = (uint32_t)(rand() % 32);
-    uint32_t rndY = (uint32_t)(rand() % 32);
+    short rndX = (short)(rand() % 32);
+    short rndY = (short)(rand() % 32);
     uint32_t result = rndX + rndY;
     printf("rnd(%u, %u), result=%u\n", rndX, rndY, result);
 
@@ -207,7 +207,7 @@ void debugger() {
 
     // create data texture
     unsigned int texData = textures[1];
-    uint32_t *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    auto *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
     memset(data, 0x41, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
     createTexture2DUI32(texData, data);
     // write special values to texture
@@ -218,7 +218,7 @@ void debugger() {
     // execute
     shader.use();
     // set uniforms
-    glUniform2ui(vertexRndLocation, rndX, rndY);
+    glUniform2i(vertexRndLocation, rndX, rndY);
     glBindTexture(GL_TEXTURE_2D, texData);
 
 
