@@ -1,31 +1,58 @@
-# Kernel-Info: Additional Info.
+# OpenGL Debugger
 
-This folders contains the `kernel-info` part of the week 1.
+## How to Run 
 
-# How to RUN
+```bash
+# 1. Compile 
+NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk
+# 2. Transfer all Binaries and shaders to the DAS node. 
+scp ./obj ... 
+scp ./shaders ... 
+# 3. Run from the headnode. Calls prun internaly.
+./prun-it
+# Note that with prun script, shaders will be copied to `/data/local/tmp/papa/shaders/tr.*`.
+# Make sure that this directory exists.
+# 4. if you are on a node directly connected to the device, directly run ./_prun-it
+```
 
-Follow the instructions of the top-level `README.md`.
+## Screenshots
 
-### Minor notes:
+![Output of the shaders read from the framebuffer](./opengl-debugger/screenshot.png)
+
+
+# Kernel-Info
+
+## How to Run  
+
+```bash
+# 1. Compile 
+NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk
+# 2. Transfer all needed files to DAS4. In this case only the `./obj` folder
+scp ... 
+# 3. Run from the headnode. Calls prun internaly.
+./prun-it
+# 4. if you are on a node directly connected to the device, directly run ./_prun-it
+```
+
+## Notes
 
 - We always used the top level `prun.sh`. Though, it cannot dump the files. Hence: 
-	- to generate a new set of dumps, a folder name `dumps` must exist next to the binary in the Android device.
+	- to generate a new set of dumps, a folder name `dumps` must exist next to the binary
 	- All files (`pagemap.dump`, `array.dump`, `kgsl.dump`) should be `touch`ed before execution in the folder and given full permission.
-	- Dumps must be enbaled from the `Android.mk` file via `-DDUMP`. Look at the commented flags.
+	- Dumps must be enbaled from the `Android.mk` file via `-DDUMP`.
 
-- Change `#define NUM_TEXTURES (32*KB)` to allocate more textures, in case no large chunks are found. In our cases, this number worked best and almost always found 1 or 2 64 page chunks with an execution time less than 5secs. 
+- Change `#define NUM_TEXTURES (32*KB)` to allocate more textures, in cases no large chunks are found. In our cases, this number worked best and almost always found 1 or 2 64 page chunks. 
 
-# Dump files 
+## Dump files 
 
-- All dumps are stored under `./dumps` directory.
-- The 3 files wanted by the assignment are `kgsl.dump`, `pagemap.dump` and `array.dump`. The only difference is that in case multiple chunks of order 6 are found, they are all stored in that single `array.dump`, right after each other. For each chunk, all kgsl entries is printed (e.g. if 64 pages next to each other are found, all 64 entries). Following the ids is enough to find the margin.
-- Other dumps are additional and show our logs. As an example, the following describes the `48.dump`. They deliver the same info in one go.
+- The 3 files wanted by the assignment are `kgsl.dump`, `pagemap.dump` and `array.dump`. The only difference is that in case multiple chunks of order 6 are found, they are all stored in that single `array.dump`. Following the ids is enough to find the margin.
+- Other dumps are additional and show our logs. As an example, the following describes the `48.dump`
 
 ```
 // name of the file implies that 48k pages are allocated 
 
 // start of the log 
-// line 7. raw log of the kgsl file. The only processing is that the pfn of the `useraddr` is added to the kgsl struct.
+// line 7. raw log of the kgsl file.
 + KGSLEntry[0+0=0] = {id: 49175, useraddr: 82c8c000, pfn: 565c, alloc_order: 0}
 + KGSLEntry[0+1=1] = {id: 49174, useraddr: 82c8e000, pfn: 565b, alloc_order: 0}
 + KGSLEntry[0+2=2] = {id: 49173, useraddr: 82c90000, pfn: 565a, alloc_order: 0}

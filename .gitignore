@@ -2,9 +2,8 @@
 .DS_STORE
 
 # Playground specific
-playground/libraries
-playground/Makefile
-playground/glitch
+libraries/
+
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
