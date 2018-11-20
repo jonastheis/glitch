@@ -1,4 +1,8 @@
-# Hello Native Development Kit (NDK)
+# DEPRECATED 
+
+Contains some notes and resources on how to setup stuff.
+
+# Hello Native Development Kit (NDK) - Set up Local Dev. Env.
 This is a short introduction on how to compile, transfer and execute native code on an Android emulator. 
 Derived from: https://software.intel.com/en-us/articles/building-an-android-command-line-application-using-the-ndk-build-tools
 
@@ -20,7 +24,6 @@ Now create the actual application.
 ```bash
 # Create necessary Makefiles Android.mk and Application.mk
 
-# Adjust contents of Android.mk file (LOCAL_MODULE, LOCAL_SRC_FILES)
 
 # Compile program
 NDK_PROJECT_PATH=. ndk-build NDK_APPLICATION_MK=./Application.mk
@@ -37,14 +40,7 @@ cd /data/exec-test/
 ./main.out
 ```
 
-### All in one command to compile, transfer and execute
-
-```bash
-./prun-it
-```
-
-
-### Resources 
+# Resources 
 
 - https://developer.android.com/ndk/guides/stable_apis#ogles-3
 - https://stackoverflow.com/questions/18529021/android-initialise-opengl2-0-context-with-egl

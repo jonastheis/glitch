@@ -1,10 +1,10 @@
-# Week 1: Kernel Info module 
+# Kernel-Info: Additional Info.
 
 This folders contains the `kernel-info` part of the week 1.
 
 # How to RUN
 
-Follow the instructions of `README.md`.
+Follow the instructions of the top-level `README.md`.
 
 ### Minor notes:
 
