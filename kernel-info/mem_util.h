@@ -12,6 +12,7 @@ typedef struct {
     uint32_t useraddr;
     char usage[20];
     int id;
+    int alloc_order;
     uint64_t pfn;
 } KGSLEntry;
 
