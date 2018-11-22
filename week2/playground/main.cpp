@@ -25,104 +25,161 @@ extern EGLDisplay display; // eglGetDisplay — return an EGL display connection
 extern EGLSurface pBuffer; // eglCreatePbufferSurface — create a new EGL pixel buffer surface
 extern EGLContext ctx;
 
-// typedef struct 
-// {
-//     GLuint       *counterList;
-//     int         numCounters;
-//     int         maxActiveCounters;
-// } CounterInfo;
-
-// void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
-//     GLint          n;
-//     GLuint        *groups;
-//     CounterInfo   *counters;
-
-//     glGetPerfMonitorGroupsAMD(&n, 0, NULL);
-//     groups = (GLuint*) malloc(n * sizeof(GLuint));
-//     glGetPerfMonitorGroupsAMD(NULL, n, groups);
-//     *numGroups = n;
-
-//     *groupsList = groups;
-//     counters = (CounterInfo*) malloc(sizeof(CounterInfo) * n);
-//     for (int i = 0 ; i < n; i++ )
-//     {
-//         glGetPerfMonitorCountersAMD(groups[i], &counters[i].numCounters,
-//          &counters[i].maxActiveCounters, 0, NULL);
-
-//         counters[i].counterList = (GLuint*)malloc(counters[i].numCounters * 
-//           sizeof(int));
-
-//         glGetPerfMonitorCountersAMD(groups[i], NULL, NULL,
-//             counters[i].numCounters, 
-//             counters[i].counterList);
-//     }
-
-//     *counterInfo = counters;
-// }
-
-// int getCounterByName(char *groupName, char *counterName, GLuint *groupID, GLuint *counterID) {
-//     int          numGroups;
-//     GLuint       *groups;
-//     CounterInfo  *counters;
-//     int          i = 0;
-
-//     if (!countersInitialized) {
-//         getGroupAndCounterList(&groups, &numGroups, &counters);
-//         countersInitialized = 1;
-//     }
-
-//     for ( i = 0; i < numGroups; i++ ) {
-//        char curGroupName[256];
-//        glGetPerfMonitorGroupStringAMD(groups[i], 256, NULL, curGroupName);
-//        if (strcmp(groupName, curGroupName) == 0)
-//        {
-//            *groupID = groups[i];
-//            break;
-//        }
-//    }
-
-//    if ( i == numGroups )
-//         return -1;           // error - could not find the group name
-
-//     for ( int j = 0; j < counters[i].numCounters; j++ )
-//     {
-//         char curCounterName[256];
-        
-//         glGetPerfMonitorCounterStringAMD(groups[i],
-//          counters[i].counterList[j], 
-//          256, NULL, curCounterName);
-//         if (strcmp(counterName, curCounterName) == 0)
-//         {
-//             *counterID = counters[i].counterList[j];
-//             return 0;
-//         }
-//     }
-
-//     return -1;           // error - could not find the counter name
-// }
-
 PFNGLGETPERFMONITORGROUPSAMDPROC glGetPerfMonitorGroupsAMD;
+PFNGLGETPERFMONITORCOUNTERSAMDPROC glGetPerfMonitorCountersAMD;
+PFNGLGETPERFMONITORGROUPSTRINGAMDPROC glGetPerfMonitorGroupStringAMD;
+PFNGLGETPERFMONITORCOUNTERSTRINGAMDPROC glGetPerfMonitorCounterStringAMD;
+PFNGLSELECTPERFMONITORCOUNTERSAMDPROC glSelectPerfMonitorCountersAMD;
+PFNGLBEGINPERFMONITORAMDPROC glBeginPerfMonitorAMD;
+PFNGLENDPERFMONITORAMDPROC glEndPerfMonitorAMD;
+PFNGLGETPERFMONITORCOUNTERDATAAMDPROC glGetPerfMonitorCounterDataAMD;
+PFNGLGETPERFMONITORCOUNTERINFOAMDPROC glGetPerfMonitorCounterInfoAMD;
 
-int main( int argc, char** argv ) {
-    egl_setup();
+typedef struct 
+{
+  GLuint       *counterList;
+  int         numCounters;
+  int         maxActiveCounters;
+} CounterInfo;
 
-    // get number of extentions 
-    GLint n=0; 
-    glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
+  GLint          n;
+  GLuint        *groups;
+  CounterInfo   *counters;
 
-    for (GLint i=0; i<n; i++) 
-    { 
-      const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-      printf("Ext %d: %s\n", i, extension); 
-    }  
+  glGetPerfMonitorGroupsAMD(&n, 0, NULL);
+  groups = (GLuint*) malloc(n * sizeof(GLuint));
+  glGetPerfMonitorGroupsAMD(NULL, n, groups);
+  *numGroups = n;
 
-    // get just the number of counter groups 
-    int num_counter_groups  = 1 ;
-    glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC) eglGetProcAddress("glGetPerfMonitorGroupsAMD");
-    printf("+ %d counter groups available\n", num_counter_groups);
-    glGetPerfMonitorGroupsAMD(&num_counter_groups, 0, NULL);
-    printf("+ %d counter groups available\n", num_counter_groups);
+  *groupsList = groups;
+  counters = (CounterInfo*) malloc(sizeof(CounterInfo) * n);
+  for (int i = 0 ; i < n; i++ )
+  {
+    glGetPerfMonitorCountersAMD(groups[i], &counters[i].numCounters,
+     &counters[i].maxActiveCounters, 0, NULL);
 
+    counters[i].counterList = (GLuint*)malloc(counters[i].numCounters * 
+      sizeof(int));
+
+    glGetPerfMonitorCountersAMD(groups[i], NULL, NULL,
+      counters[i].numCounters, 
+      counters[i].counterList);
+  }
+
+  *counterInfo = counters;
+}
+
+void getCounterNames() {
+  int          numGroups;
+  GLuint       *groups;
+  CounterInfo  *counters;
+  int          i = 0;
+
+  getGroupAndCounterList(&groups, &numGroups, &counters);
+
+  for ( i = 0; i < numGroups; i++ ) {
+    char curGroupName[256];
+    glGetPerfMonitorGroupStringAMD(groups[i], 256, NULL, curGroupName);
+    printf("group[%d] = %s\n",i, curGroupName );
+    for ( int j = 0; j < counters[i].numCounters; j++ ) {
+      char curCounterName[256];
+      glGetPerfMonitorCounterStringAMD(groups[i], counters[i].counterList[j], 256, NULL, curCounterName);
+      printf("\t counters[%d] = %s\n", j, curCounterName);
+    }
+  }
+}
+
+void init_functions() {
+  glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC) eglGetProcAddress("glGetPerfMonitorGroupsAMD");
+  glGetPerfMonitorCountersAMD = (PFNGLGETPERFMONITORCOUNTERSAMDPROC) eglGetProcAddress("glGetPerfMonitorCountersAMD");
+  glGetPerfMonitorGroupStringAMD = (PFNGLGETPERFMONITORGROUPSTRINGAMDPROC) eglGetProcAddress("glGetPerfMonitorGroupStringAMD");
+  glGetPerfMonitorCounterStringAMD = (PFNGLGETPERFMONITORCOUNTERSTRINGAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterStringAMD");
+  glSelectPerfMonitorCountersAMD = (PFNGLSELECTPERFMONITORCOUNTERSAMDPROC) eglGetProcAddress("glSelectPerfMonitorCountersAMD");
+  glBeginPerfMonitorAMD = (PFNGLBEGINPERFMONITORAMDPROC) eglGetProcAddress("glBeginPerfMonitorAMD");
+  glEndPerfMonitorAMD = (PFNGLENDPERFMONITORAMDPROC) eglGetProcAddress("glEndPerfMonitorAMD");
+  glGetPerfMonitorCounterDataAMD = (PFNGLGETPERFMONITORCOUNTERDATAAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterDataAMD");
+  glGetPerfMonitorCounterInfoAMD = (PFNGLGETPERFMONITORCOUNTERINFOAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterInfoAMD");
+}
+
+  int main( int argc, char** argv ) {
+    egl_setup(); 
+    init_functions();
+    getCounterNames();
+
+    // enable the counters
+    int group[2] = {9, 9}; 
+    GLuint counter[2] = {0, 1}; 
+    GLuint monitor;
+    GLuint *counterData;
+
+    glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[0], 1,
+                                   &counter[0]);
+    glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[1], 1, 
+                                   &counter[1]);
+
+    glBeginPerfMonitorAMD(monitor);
+
+    // RENDER FRAME HERE
+    // ...
+    
+    glEndPerfMonitorAMD(monitor);
+
+    // read the counters
+    GLuint resultSize;
+    glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, 
+                                   sizeof(GLint), &resultSize, NULL);
+
+    counterData = (GLuint*) malloc(resultSize);
+
+    GLsizei bytesWritten;
+    glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD,  
+                                   resultSize, counterData, &bytesWritten);
+
+    printf("+++ ");
+    for (int i = 0; i < bytesWritten; i++)
+      printf("%u", *(counterData+i));
+
+    printf("\n");
+    // display or log counter info
+    GLsizei wordCount = 0;
+
+    while ( (4 * wordCount) < bytesWritten )
+    {
+
+      GLuint groupId = counterData[wordCount];
+      GLuint counterId = counterData[wordCount + 1];
+
+      // Determine the counter type
+      GLuint counterType;
+      glGetPerfMonitorCounterInfoAMD(groupId, counterId, 
+                                     GL_COUNTER_TYPE_AMD, &counterType);
+
+      if ( counterType == GL_UNSIGNED_INT64_AMD )
+      {
+          uint64_t counterResult = *(uint64_t*)(&counterData[wordCount + 2]);
+          printf("[groupId %d][counterId %d] data => %llu\n", groupId, counterId, counterResult);
+
+          wordCount += 4;
+      }
+      else if ( counterType == GL_FLOAT )
+      {
+          float counterResult = *(float*)(&counterData[wordCount + 2]);
+          printf("[groupId %d][counterId %d] data => %f\n", groupId, counterId, counterResult);
+
+          wordCount += 3;
+      } 
+      // else if ( ... ) check for other counter types 
+      //   (GL_UNSIGNED_INT and GL_PERCENTAGE_AMD)
+    }
+ 
+
+
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////
 
 
     GLuint VAO;
@@ -130,7 +187,7 @@ int main( int argc, char** argv ) {
     glBindVertexArray(VAO);
 
     GLfloat vertex_buffer_data[] = {
-       0.5f,  0.5f, 0.0f,
+     0.5f,  0.5f, 0.0f,
    };
 
     // vertex_buffer id
@@ -145,8 +202,8 @@ int main( int argc, char** argv ) {
 
     // create shaders 
    Shader shader(
-    "/data/exec-test/tr.vs",
-    "/data/exec-test/tr.fs");
+    "/data/local/tmp/papa/shaders/tr.vs",
+    "/data/local/tmp/papa/shaders/tr.fs");
 
 
     // draw. Could go inside a loop? 
@@ -169,4 +226,4 @@ int main( int argc, char** argv ) {
     glDisableVertexAttribArray(0);
 
     return 0;
-}
+  }
