@@ -17,8 +17,8 @@ using namespace std;
 
 #define KB 1024
 #define MB (1024*1024)
-#define WINDOW_WIDTH 4
-#define WINDOW_HEIGHT 4
+#define WINDOW_WIDTH 5
+#define WINDOW_HEIGHT 5
 
 
 // import global variables from setup phase
@@ -48,7 +48,7 @@ int          numGroups;
 GLuint       *groups;
 CounterInfo  *counters;
 
-void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
+void init_groups_counters(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
   GLint          n;
   GLuint        *groups;
   CounterInfo   *counters;
@@ -75,10 +75,8 @@ void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **c
   *counterInfo = counters;
 }
 
-void getCounterNames(int verbose) {
+void dump_counter_names(int verbose) {
   int          i = 0;
-
-  getGroupAndCounterList(&groups, &numGroups, &counters);
 
   if ( verbose ) {
     for ( i = 0; i < numGroups; i++ ) {
@@ -104,7 +102,7 @@ void getCounterNames(int verbose) {
   }
 }
 
-void init_functions() {
+void init_perf_functions() {
   glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC) eglGetProcAddress("glGetPerfMonitorGroupsAMD");
   glGetPerfMonitorCountersAMD = (PFNGLGETPERFMONITORCOUNTERSAMDPROC) eglGetProcAddress("glGetPerfMonitorCountersAMD");
   glGetPerfMonitorGroupStringAMD = (PFNGLGETPERFMONITORGROUPSTRINGAMDPROC) eglGetProcAddress("glGetPerfMonitorGroupStringAMD");
@@ -216,106 +214,98 @@ void init_frame_render() {
     glBindTexture(GL_TEXTURE_2D, texData);
 }
 
-int main( int argc, char** argv ) {
-  egl_setup(); 
-  init_functions();
-  init_frame_render();
-  getCounterNames(0);
-
-  // enable the counters
-  GLuint target_groups[2] = {9, 9}; 
-  GLuint target_counters[2] = {1, 2}; 
-  GLuint monitor;
+void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_counters, GLuint num_target_counters) {
   GLuint *counterData;
+  printf("+ measuring performance for %d counters\n", num_target_counters);
+  for (int i = 0; i < num_target_counters; i++) {
+    glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[i], 1, &target_counters[i]);  
+  }
 
-  glGenPerfMonitorsAMD(1, &monitor);
-  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[0], 1, &target_counters[0]);
-  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[1], 1, &target_counters[1]);
-
-  // -----------------------------------------------------------------------------------------
   glBeginPerfMonitorAMD(monitor);
-
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   viewFrameBuffer();
-
   // glDrawArrays(GL_TR, 0, 1);
-  
   glEndPerfMonitorAMD(monitor);
-  // -----------------------------------------------------------------------------------------
 
   // check if there is anything ready? 
   GLuint data_ready = 0; 
-  printf("+ waiting on data to become ready.\n");
+  printf("+ waiting on data to become ready");
   int count = 0;
-  while (! data_ready ) {
+  while ( !data_ready ) {
     glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AVAILABLE_AMD, sizeof(GLuint), &data_ready, NULL);
-    printf("data_ready = %d\n", data_ready);
-    usleep(1000000);
-    if ( ++count > 4 ) { break; }
+    printf(".");
+    usleep(1000);
   }
+  printf("\n");
 
-  printf("+ data_ready = %u\n", data_ready);
-
-  // read the counters
-  GLuint resultSize = 12;
+  // get the size of data.
+  GLuint resultSize;
   glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, sizeof(GLint), &resultSize, NULL);
-
   printf("+ resultSize = [%d] [%u] [%x]\n", resultSize, resultSize, resultSize);
   counterData = (GLuint*) malloc(resultSize);
 
+  // read data
   GLint bytesWritten;
   glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD, resultSize, counterData, &bytesWritten);
-
   printf("+ bytesWritten = %d\n", bytesWritten);
 
-  printf("+++ Raw Result Data: \n");
-  fflush(stdout);
-  
-  for (int i = 0; i < bytesWritten; i++)
-    printf("%x ", *(counterData+i));
+  // print raw data
+  printf("++ Raw Result Data: ");
+  for (int i = 0; i < bytesWritten/(sizeof(GLuint)); i++)
+    printf("[%x] ", *(counterData+i));
   printf("\n");
-  for (int i = 0; i < bytesWritten; i++)
-    printf("%u ", *(counterData+i));
-  printf("\n");
-  // display or log counter info
-  GLsizei wordCount = 0;
 
+  // print parsed data
+  GLsizei wordCount = 0;
   while ( (4 * wordCount) < bytesWritten )
   {
-
     GLuint groupId = counterData[wordCount];
     GLuint counterId = counterData[wordCount + 1];
 
     // Determine the counter type
     GLuint counterType;
-    glGetPerfMonitorCounterInfoAMD(groupId, counterId, 
-                                   GL_COUNTER_TYPE_AMD, &counterType);
+    glGetPerfMonitorCounterInfoAMD(groupId, counterId, GL_COUNTER_TYPE_AMD, &counterType);
 
     if ( counterType == GL_UNSIGNED_INT64_AMD ) {
         uint64_t counterResult = *(uint64_t*)(&counterData[wordCount + 2]);
-        printf("[groupId %d][counterId %d] data => %llu\n", groupId, counterId, counterResult);
-
+        printf("+++ [groupId %d][counterId %d] data => %llu\n", groupId, counterId, counterResult);
         wordCount += 4;
     }
     else if ( counterType == GL_FLOAT ) {
         float counterResult = *(float*)(&counterData[wordCount + 2]);
-        printf("[groupId %d][counterId %d] data => %f\n", groupId, counterId, counterResult);
-
+        printf("+++ [groupId %d][counterId %d] data => %f\n", groupId, counterId, counterResult);
         wordCount += 3;
     } 
     // else if ( ... ) check for other counter types 
     //   (GL_UNSIGNED_INT and GL_PERCENTAGE_AMD)
   }
+}
 
-  /////////////////////////////////////////////////////////////////////////////////
+int main( int argc, char** argv ) {
+  egl_setup(); 
 
-  printf("Fooooo \n");
-  printf("Fooooo \n");
-  printf("Fooooo \n");
-  printf("Fooooo \n");
-  printf("Fooooo \n");
+  // initialize counters and functions 
+  init_perf_functions();
+  init_groups_counters(&groups, &numGroups, &counters);
 
+  // dump the list of counters. use `1` as parameter to get full names
+  // dump_counter_names(0);
 
+  // initialize the opengl render part. creates 1x1 rectangle. 
+  init_frame_render();
+
+  // determine the counters to be used 
+  GLuint target_groups[] = {9, 9, 9, 9, 9, 0}; 
+  GLuint target_counters[] = {1, 2, 3, 4, 5, 0}; 
+  GLuint num_target_counters = 6;
+
+  // enable ounters and monitor
+  GLuint monitor;
+  glGenPerfMonitorsAMD(1, &monitor);
+
+  measure_counters(monitor, target_groups, target_counters, num_target_counters);
+
+  // cleanup
   glDeletePerfMonitorsAMD(1, &monitor);
   return 0;
 }
