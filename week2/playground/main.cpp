@@ -1,11 +1,12 @@
-#include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
-// TODO: why the fuck was I forced to import this?
+#include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+// #include <GLES3/gl3ext.h>
+// TODO: why the fuck was I forced to import this?
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 #include <stdio.h>
+#include <unistd.h>
 #include <iostream>
 
 #include "eglSetup.h"
@@ -34,13 +35,18 @@ PFNGLBEGINPERFMONITORAMDPROC glBeginPerfMonitorAMD;
 PFNGLENDPERFMONITORAMDPROC glEndPerfMonitorAMD;
 PFNGLGETPERFMONITORCOUNTERDATAAMDPROC glGetPerfMonitorCounterDataAMD;
 PFNGLGETPERFMONITORCOUNTERINFOAMDPROC glGetPerfMonitorCounterInfoAMD;
+PFNGLGENPERFMONITORSAMDPROC glGenPerfMonitorsAMD;
+PFNGLDELETEPERFMONITORSAMDPROC glDeletePerfMonitorsAMD;
 
-typedef struct 
-{
+typedef struct {
   GLuint       *counterList;
   int         numCounters;
   int         maxActiveCounters;
 } CounterInfo;
+
+int          numGroups;
+GLuint       *groups;
+CounterInfo  *counters;
 
 void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
   GLint          n;
@@ -69,22 +75,31 @@ void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **c
   *counterInfo = counters;
 }
 
-void getCounterNames() {
-  int          numGroups;
-  GLuint       *groups;
-  CounterInfo  *counters;
+void getCounterNames(int verbose) {
   int          i = 0;
 
   getGroupAndCounterList(&groups, &numGroups, &counters);
 
-  for ( i = 0; i < numGroups; i++ ) {
-    char curGroupName[256];
-    glGetPerfMonitorGroupStringAMD(groups[i], 256, NULL, curGroupName);
-    printf("group[%d] = %s\n",i, curGroupName );
-    for ( int j = 0; j < counters[i].numCounters; j++ ) {
-      char curCounterName[256];
-      glGetPerfMonitorCounterStringAMD(groups[i], counters[i].counterList[j], 256, NULL, curCounterName);
-      printf("\t counters[%d] = %s\n", j, curCounterName);
+  if ( verbose ) {
+    for ( i = 0; i < numGroups; i++ ) {
+      char curGroupName[256];
+      glGetPerfMonitorGroupStringAMD(groups[i], 256, NULL, curGroupName);
+      printf("group[%d] = %s\n",i, curGroupName );
+      for ( int j = 0; j < counters[i].numCounters; j++ ) {
+        char curCounterName[256];
+        glGetPerfMonitorCounterStringAMD(groups[i], counters[i].counterList[j], 256, NULL, curCounterName);
+        printf("\t counters[%d] = %s\n", j, curCounterName);
+      }
+    }
+  }
+  else {
+    printf("+ numGroups = %d\n", numGroups);
+    for (int i = 0; i < numGroups; i++) {
+      printf("groups[%d] = [", groups[i]);
+      for (int j = 0; j < counters[i].numCounters; j++) {
+        printf("%d ,", j);
+      } 
+      printf("]\n");
     }
   }
 }
@@ -99,6 +114,8 @@ void init_functions() {
   glEndPerfMonitorAMD = (PFNGLENDPERFMONITORAMDPROC) eglGetProcAddress("glEndPerfMonitorAMD");
   glGetPerfMonitorCounterDataAMD = (PFNGLGETPERFMONITORCOUNTERDATAAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterDataAMD");
   glGetPerfMonitorCounterInfoAMD = (PFNGLGETPERFMONITORCOUNTERINFOAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterInfoAMD");
+  glGenPerfMonitorsAMD = (PFNGLGENPERFMONITORSAMDPROC) eglGetProcAddress("glGenPerfMonitorsAMD");
+  glDeletePerfMonitorsAMD = (PFNGLDELETEPERFMONITORSAMDPROC) eglGetProcAddress("glDeletePerfMonitorsAMD");
 }
 
 void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
@@ -158,7 +175,6 @@ void viewFrameBuffer() {
 }
 
 void init_frame_render() {
-
     // generate textures
     GLuint textures[2];
     glGenTextures(2, (GLuint*)&textures);
@@ -199,54 +215,68 @@ void init_frame_render() {
     // glUniform2i(vertexRndLocation, rndX, rndY);
     glBindTexture(GL_TEXTURE_2D, texData);
 }
+
 int main( int argc, char** argv ) {
   egl_setup(); 
-
-  init_frame_render();
-
   init_functions();
-  // getCounterNames();
+  init_frame_render();
+  getCounterNames(0);
 
   // enable the counters
-  GLuint group[2] = {9, 9}; 
-  GLuint counter[2] = {1, 2}; 
+  GLuint target_groups[2] = {9, 9}; 
+  GLuint target_counters[2] = {1, 2}; 
   GLuint monitor;
   GLuint *counterData;
 
-  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[0], 1, &counter[0]);
-  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[1], 1, 
-                                 &counter[1]);
+  glGenPerfMonitorsAMD(1, &monitor);
+  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[0], 1, &target_counters[0]);
+  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[1], 1, &target_counters[1]);
 
+  // -----------------------------------------------------------------------------------------
   glBeginPerfMonitorAMD(monitor);
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  viewFrameBuffer();
+
   // glDrawArrays(GL_TR, 0, 1);
   
   glEndPerfMonitorAMD(monitor);
+  // -----------------------------------------------------------------------------------------
 
-  viewFrameBuffer();
+  // check if there is anything ready? 
+  GLuint data_ready = 0; 
+  printf("+ waiting on data to become ready.\n");
+  int count = 0;
+  while (! data_ready ) {
+    glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AVAILABLE_AMD, sizeof(GLuint), &data_ready, NULL);
+    printf("data_ready = %d\n", data_ready);
+    usleep(1000000);
+    if ( ++count > 4 ) { break; }
+  }
+
+  printf("+ data_ready = %u\n", data_ready);
 
   // read the counters
-  GLuint resultSize;
-  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, 
-                                 sizeof(GLuint), &resultSize, NULL);
-  printf("+ resultSize = %u\n",resultSize);
+  GLuint resultSize = 12;
+  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, sizeof(GLint), &resultSize, NULL);
+
+  printf("+ resultSize = [%d] [%u] [%x]\n", resultSize, resultSize, resultSize);
   counterData = (GLuint*) malloc(resultSize);
 
-
-  GLsizei bytesWritten;
-  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD,  
-                                 resultSize, counterData, &bytesWritten);
+  GLint bytesWritten;
+  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD, resultSize, counterData, &bytesWritten);
 
   printf("+ bytesWritten = %d\n", bytesWritten);
 
-  printf("+++ Raw Result Data: ");
+  printf("+++ Raw Result Data: \n");
   fflush(stdout);
+  
   for (int i = 0; i < bytesWritten; i++)
-    printf("%u", *(counterData+i));
-  // printf("++ here1\n");
-  // fflush(stdout);
-  // printf("\n");
+    printf("%x ", *(counterData+i));
+  printf("\n");
+  for (int i = 0; i < bytesWritten; i++)
+    printf("%u ", *(counterData+i));
+  printf("\n");
   // display or log counter info
   GLsizei wordCount = 0;
 
@@ -286,5 +316,6 @@ int main( int argc, char** argv ) {
   printf("Fooooo \n");
 
 
+  glDeletePerfMonitorsAMD(1, &monitor);
   return 0;
 }
