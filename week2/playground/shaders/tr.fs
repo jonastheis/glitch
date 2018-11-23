@@ -1,7 +1,8 @@
 #version 300 es
-precision mediump float; // this is needed in webgl and some es version apparently.
-out vec3 color;
+out uvec4 FragColor;
+
+uniform usampler2D dataTexture;
 
 void main(){
-  color = vec3(1,0,0);
+	FragColor = uvec4(texelFetch(dataTexture, ivec2(0,0), 0));
 }

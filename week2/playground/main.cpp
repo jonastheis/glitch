@@ -16,8 +16,8 @@ using namespace std;
 
 #define KB 1024
 #define MB (1024*1024)
-#define WINDOW_WIDTH 32
-#define WINDOW_HEIGHT 32
+#define WINDOW_WIDTH 4
+#define WINDOW_HEIGHT 4
 
 
 // import global variables from setup phase
@@ -54,8 +54,7 @@ void getGroupAndCounterList(GLuint **groupsList, int *numGroups, CounterInfo **c
 
   *groupsList = groups;
   counters = (CounterInfo*) malloc(sizeof(CounterInfo) * n);
-  for (int i = 0 ; i < n; i++ )
-  {
+  for (int i = 0 ; i < n; i++ ) {
     glGetPerfMonitorCountersAMD(groups[i], &counters[i].numCounters,
      &counters[i].maxActiveCounters, 0, NULL);
 
@@ -102,128 +101,190 @@ void init_functions() {
   glGetPerfMonitorCounterInfoAMD = (PFNGLGETPERFMONITORCOUNTERINFOAMDPROC) eglGetProcAddress("glGetPerfMonitorCounterInfoAMD");
 }
 
-  int main( int argc, char** argv ) {
-    egl_setup(); 
-    init_functions();
-    getCounterNames();
+void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-    // enable the counters
-    int group[2] = {9, 9}; 
-    GLuint counter[2] = {0, 1}; 
-    GLuint monitor;
-    GLuint *counterData;
-
-    glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[0], 1,
-                                   &counter[0]);
-    glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[1], 1, 
-                                   &counter[1]);
-
-    glBeginPerfMonitorAMD(monitor);
-
-    // RENDER FRAME HERE
-    // ...
-    
-    glEndPerfMonitorAMD(monitor);
-
-    // read the counters
-    GLuint resultSize;
-    glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, 
-                                   sizeof(GLint), &resultSize, NULL);
-
-    counterData = (GLuint*) malloc(resultSize);
-
-    GLsizei bytesWritten;
-    glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD,  
-                                   resultSize, counterData, &bytesWritten);
-
-    printf("+++ ");
-    for (int i = 0; i < bytesWritten; i++)
-      printf("%u", *(counterData+i));
-
-    printf("\n");
-    // display or log counter info
-    GLsizei wordCount = 0;
-
-    while ( (4 * wordCount) < bytesWritten )
-    {
-
-      GLuint groupId = counterData[wordCount];
-      GLuint counterId = counterData[wordCount + 1];
-
-      // Determine the counter type
-      GLuint counterType;
-      glGetPerfMonitorCounterInfoAMD(groupId, counterId, 
-                                     GL_COUNTER_TYPE_AMD, &counterType);
-
-      if ( counterType == GL_UNSIGNED_INT64_AMD )
-      {
-          uint64_t counterResult = *(uint64_t*)(&counterData[wordCount + 2]);
-          printf("[groupId %d][counterId %d] data => %llu\n", groupId, counterId, counterResult);
-
-          wordCount += 4;
-      }
-      else if ( counterType == GL_FLOAT )
-      {
-          float counterResult = *(float*)(&counterData[wordCount + 2]);
-          printf("[groupId %d][counterId %d] data => %f\n", groupId, counterId, counterResult);
-
-          wordCount += 3;
-      } 
-      // else if ( ... ) check for other counter types 
-      //   (GL_UNSIGNED_INT and GL_PERCENTAGE_AMD)
-    }
- 
-
-
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////////////
-
-
-    GLuint VAO;
+void createRectangle() {
+    // prepare rectangle
+    float vertices[] = {
+            1,  1, 0.0f,  // top right
+            1, -1, 0.0f,  // bottom right
+            -1, -1, 0.0f,  // bottom left
+            -1,  1, 0.0f   // top left
+    };
+    unsigned int indices[] = {  // note that we start from 0!
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
+    };
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes
     glBindVertexArray(VAO);
 
-    GLfloat vertex_buffer_data[] = {
-     0.5f,  0.5f, 0.0f,
-   };
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // vertex_buffer id
-   GLuint vertex_buffer;
-    // Generate 1 buffer
-   glGenBuffers(1, &vertex_buffer);
-    // The following commands will talk about our 'vertex_buffer' buffer
-   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    // Give our vertices to OpenGL.
-   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_data), vertex_buffer_data, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-    // create shaders 
-   Shader shader(
-    "/data/local/tmp/papa/shaders/tr.vs",
-    "/data/local/tmp/papa/shaders/tr.fs");
-
-
-    // draw. Could go inside a loop? 
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    shader.use(); // equivalent of glUseProgram
-
-    // 1st attribute buffer : vertices
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glVertexAttribPointer(
-       0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-       1,                  // size
-       GL_FLOAT,           // type
-       GL_FALSE,           // normalized?
-       0,                  // stride
-       (void*)0            // array buffer offset
-       );
-    glDrawArrays(GL_POINTS, 0, 1); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
 
-    return 0;
+    // binding one time is sufficient, because there is only 1 object to draw
+    glBindVertexArray(VAO);
+}
+
+void viewFrameBuffer() {
+  // allocate data in memory
+  printf("+ framebuffer = \n");
+    uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
+    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
+
+    for (int i = 0; i <WINDOW_WIDTH; ++i) {
+        for (int j = 0; j < WINDOW_HEIGHT; ++j) {
+            printf("%u ", exportData[i+j*WINDOW_WIDTH]);
+        }
+        printf("\n");
+    }
+}
+
+void init_frame_render() {
+
+    // generate textures
+    GLuint textures[2];
+    glGenTextures(2, (GLuint*)&textures);
+    unsigned int texColorBuffer = textures[0];
+    unsigned int texData        = textures[1];
+
+    // allocate framebuffer with texture
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // set up framebuffer & attached texture
+    createTexture2DUI32(texColorBuffer, NULL);
+    // attach it to currently bound framebuffer object
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+    // Render to our framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    }
+
+    // create rectangle
+    createRectangle();
+
+    Shader shader(
+      "/data/local/tmp/papa/shaders/tr.vs",
+      "/data/local/tmp/papa/shaders/tr.fs");
+
+    // create data texture
+    auto *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    memset(data, 0x01, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    createTexture2DUI32(texData, data);
+
+
+    // execute
+    shader.use();
+    // set uniforms
+    // glUniform2i(vertexRndLocation, rndX, rndY);
+    glBindTexture(GL_TEXTURE_2D, texData);
+}
+int main( int argc, char** argv ) {
+  egl_setup(); 
+
+  init_frame_render();
+
+  init_functions();
+  // getCounterNames();
+
+  // enable the counters
+  GLuint group[2] = {9, 9}; 
+  GLuint counter[2] = {1, 2}; 
+  GLuint monitor;
+  GLuint *counterData;
+
+  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[0], 1, &counter[0]);
+  glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, group[1], 1, 
+                                 &counter[1]);
+
+  glBeginPerfMonitorAMD(monitor);
+
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  // glDrawArrays(GL_TR, 0, 1);
+  
+  glEndPerfMonitorAMD(monitor);
+
+  viewFrameBuffer();
+
+  // read the counters
+  GLuint resultSize;
+  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, 
+                                 sizeof(GLuint), &resultSize, NULL);
+  printf("+ resultSize = %u\n",resultSize);
+  counterData = (GLuint*) malloc(resultSize);
+
+
+  GLsizei bytesWritten;
+  glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD,  
+                                 resultSize, counterData, &bytesWritten);
+
+  printf("+ bytesWritten = %d\n", bytesWritten);
+
+  printf("+++ Raw Result Data: ");
+  fflush(stdout);
+  for (int i = 0; i < bytesWritten; i++)
+    printf("%u", *(counterData+i));
+  // printf("++ here1\n");
+  // fflush(stdout);
+  // printf("\n");
+  // display or log counter info
+  GLsizei wordCount = 0;
+
+  while ( (4 * wordCount) < bytesWritten )
+  {
+
+    GLuint groupId = counterData[wordCount];
+    GLuint counterId = counterData[wordCount + 1];
+
+    // Determine the counter type
+    GLuint counterType;
+    glGetPerfMonitorCounterInfoAMD(groupId, counterId, 
+                                   GL_COUNTER_TYPE_AMD, &counterType);
+
+    if ( counterType == GL_UNSIGNED_INT64_AMD ) {
+        uint64_t counterResult = *(uint64_t*)(&counterData[wordCount + 2]);
+        printf("[groupId %d][counterId %d] data => %llu\n", groupId, counterId, counterResult);
+
+        wordCount += 4;
+    }
+    else if ( counterType == GL_FLOAT ) {
+        float counterResult = *(float*)(&counterData[wordCount + 2]);
+        printf("[groupId %d][counterId %d] data => %f\n", groupId, counterId, counterResult);
+
+        wordCount += 3;
+    } 
+    // else if ( ... ) check for other counter types 
+    //   (GL_UNSIGNED_INT and GL_PERCENTAGE_AMD)
   }
+
+  /////////////////////////////////////////////////////////////////////////////////
+
+  printf("Fooooo \n");
+  printf("Fooooo \n");
+  printf("Fooooo \n");
+  printf("Fooooo \n");
+  printf("Fooooo \n");
+
+
+  return 0;
+}
