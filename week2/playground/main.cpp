@@ -216,7 +216,7 @@ void init_frame_render() {
 
 void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_counters, GLuint num_target_counters) {
   GLuint *counterData;
-  printf("+ measuring performance for %d counters\n", num_target_counters);
+  printf("+ measuring performance for %d counters for [%dx%d = %d] shader calls \n", num_target_counters, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_HEIGHT*WINDOW_WIDTH);
   for (int i = 0; i < num_target_counters; i++) {
     glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[i], 1, &target_counters[i]);  
   }
