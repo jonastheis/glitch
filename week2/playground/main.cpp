@@ -17,8 +17,11 @@ using namespace std;
 
 #define KB 1024
 #define MB (1024*1024)
-#define WINDOW_WIDTH 5
-#define WINDOW_HEIGHT 5
+#define WINDOW_WIDTH 1
+#define WINDOW_HEIGHT 1
+
+#define TEXTURE_WIDTH 128
+#define TEXTURE_HEIGHT 128
 
 
 // import global variables from setup phase
@@ -202,8 +205,8 @@ void init_frame_render() {
       "/data/local/tmp/papa/shaders/tr.fs");
 
     // create data texture
-    auto *data = (uint32_t*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
-    memset(data, 0x01, WINDOW_WIDTH*WINDOW_HEIGHT * sizeof(uint32_t));
+    auto *data = (uint32_t*) malloc(TEXTURE_WIDTH*TEXTURE_HEIGHT * sizeof(uint32_t));
+    memset(data, 0x01, TEXTURE_HEIGHT*TEXTURE_WIDTH * sizeof(uint32_t));
     createTexture2DUI32(texData, data);
 
 
@@ -241,7 +244,7 @@ void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_cou
   // get the size of data.
   GLuint resultSize;
   glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, sizeof(GLint), &resultSize, NULL);
-  printf("+ resultSize = [%d] [%u] [%x]\n", resultSize, resultSize, resultSize);
+  printf("+ resultSize = [%d]\n", resultSize);
   counterData = (GLuint*) malloc(resultSize);
 
   // read data
@@ -289,14 +292,26 @@ int main( int argc, char** argv ) {
   init_groups_counters(&groups, &numGroups, &counters);
 
   // dump the list of counters. use `1` as parameter to get full names
-  // dump_counter_names(0);
+  dump_counter_names(1);
 
-  // initialize the opengl render part. creates 1x1 rectangle. 
+  // initialize the opengl render part. creates 5x5 rectangle. 
   init_frame_render();
 
   // determine the counters to be used 
-  GLuint target_groups[] = {9, 9, 9, 9, 9, 0}; 
-  GLuint target_counters[] = {1, 2, 3, 4, 5, 0}; 
+  /* 
+  group[9] = TP
+       counters[0] = TPL1_TPPERF_L1_REQUESTS
+       counters[1] = TPL1_TPPERF_TP0_L1_REQUESTS
+       counters[2] = TPL1_TPPERF_TP0_L1_MISSES
+       counters[3] = TPL1_TPPERF_TP1_L1_REQUESTS
+       counters[4] = TPL1_TPPERF_TP1_L1_MISSES
+       counters[5] = TPL1_TPPERF_TP2_L1_REQUESTS
+       counters[6] = TPL1_TPPERF_TP2_L1_MISSES
+       counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
+       counters[8] = TPL1_TPPERF_TP3_L1_MISSES
+  */
+  GLuint target_groups[]   = {9, 9, 9, 9, 9, 9}; 
+  GLuint target_counters[] = {3, 4, 5, 6, 7, 8}; 
   GLuint num_target_counters = 6;
 
   // enable ounters and monitor
