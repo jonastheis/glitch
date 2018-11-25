@@ -20,8 +20,8 @@ using namespace std;
 #define WINDOW_WIDTH 1
 #define WINDOW_HEIGHT 1
 
-#define TEXTURE_WIDTH 128
-#define TEXTURE_HEIGHT 128
+#define TEXTURE_WIDTH 512
+#define TEXTURE_HEIGHT 512
 
 
 // import global variables from setup phase
@@ -121,7 +121,7 @@ void init_perf_functions() {
 
 void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -310,8 +310,8 @@ int main( int argc, char** argv ) {
        counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
        counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
-  GLuint target_groups[]   = {9, 9, 9, 9, 9, 9}; 
-  GLuint target_counters[] = {3, 4, 5, 6, 7, 8}; 
+  GLuint target_groups[]   = {10, 10, 8, 8, 9, 9}; 
+  GLuint target_counters[] = {20, 21, 0, 5, 7, 8}; 
   GLuint num_target_counters = 6;
 
   // enable ounters and monitor
