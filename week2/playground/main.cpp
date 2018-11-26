@@ -17,11 +17,11 @@ using namespace std;
 
 #define KB 1024
 #define MB (1024*1024)
-#define WINDOW_WIDTH 1
-#define WINDOW_HEIGHT 1
+#define WINDOW_WIDTH 5
+#define WINDOW_HEIGHT 5
 
-#define TEXTURE_WIDTH 512
-#define TEXTURE_HEIGHT 512
+#define TEXTURE_WIDTH 32
+#define TEXTURE_HEIGHT 32
 
 
 // import global variables from setup phase
@@ -119,9 +119,11 @@ void init_perf_functions() {
   glDeletePerfMonitorsAMD = (PFNGLDELETEPERFMONITORSAMDPROC) eglGetProcAddress("glDeletePerfMonitorsAMD");
 }
 
-void createTexture2DUI32(unsigned int textureId, uint32_t *data) {
+void createTexture2DUI32(unsigned int textureId, uint32_t *data, GLuint width, GLuint height) {
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -165,7 +167,8 @@ void viewFrameBuffer() {
   // allocate data in memory
   printf("+ framebuffer = \n");
     uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
-    glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
+    // glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
+    // glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA        , GL_UNSIGNED_INT, exportData);
 
     for (int i = 0; i <WINDOW_WIDTH; ++i) {
         for (int j = 0; j < WINDOW_HEIGHT; ++j) {
@@ -183,19 +186,19 @@ void init_frame_render() {
     unsigned int texData        = textures[1];
 
     // allocate framebuffer with texture
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // unsigned int framebuffer;
+    // glGenFramebuffers(1, &framebuffer);
+    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-    // set up framebuffer & attached texture
-    createTexture2DUI32(texColorBuffer, NULL);
-    // attach it to currently bound framebuffer object
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
-    // Render to our framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    }
+    // // set up framebuffer & attached texture
+    // createTexture2DUI32(texColorBuffer, NULL);
+    // // attach it to currently bound framebuffer object
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+    // // Render to our framebuffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    //     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    // }
 
     // create rectangle
     createRectangle();
@@ -206,8 +209,13 @@ void init_frame_render() {
 
     // create data texture
     auto *data = (uint32_t*) malloc(TEXTURE_WIDTH*TEXTURE_HEIGHT * sizeof(uint32_t));
+    // for (int i = 0; i < TEXTURE_WIDTH; i++) {
+    //   for (int j = 0; j < TEXTURE_HEIGHT; j++) {
+    //     data[i*TEXTURE_WIDTH+j] = i*TEXTURE_WIDTH+j; 
+    //   }
+    // }
     memset(data, 0x01, TEXTURE_HEIGHT*TEXTURE_WIDTH * sizeof(uint32_t));
-    createTexture2DUI32(texData, data);
+    createTexture2DUI32(texData, data, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
 
     // execute
@@ -225,9 +233,11 @@ void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_cou
   }
 
   glBeginPerfMonitorAMD(monitor);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  viewFrameBuffer();
-  // glDrawArrays(GL_TR, 0, 1);
+
+  glDrawArrays(GL_POINTS, 0, 1);
+  // viewFrameBuffer();
+  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
   glEndPerfMonitorAMD(monitor);
 
   // check if there is anything ready? 
@@ -292,7 +302,7 @@ int main( int argc, char** argv ) {
   init_groups_counters(&groups, &numGroups, &counters);
 
   // dump the list of counters. use `1` as parameter to get full names
-  dump_counter_names(1);
+  // dump_counter_names(1);
 
   // initialize the opengl render part. creates 5x5 rectangle. 
   init_frame_render();
@@ -310,15 +320,20 @@ int main( int argc, char** argv ) {
        counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
        counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
-  GLuint target_groups[]   = {10, 10, 8, 8, 9, 9}; 
-  GLuint target_counters[] = {20, 21, 0, 5, 7, 8}; 
-  GLuint num_target_counters = 6;
+  GLuint target_group1[]   = {9, 9, 9, 9}; 
+  GLuint target_counter1[] = {1, 2, 3, 4}; 
+  GLuint target_group2[]   = {9, 9, 9, 9}; 
+  GLuint target_counter2[] = {5, 6, 7, 8}; 
+  GLuint num_target_counters = 4;
 
+  // target_groups = &target_groups[4];
+  // target_counters = &target_counters[4];
   // enable ounters and monitor
   GLuint monitor;
   glGenPerfMonitorsAMD(1, &monitor);
 
-  measure_counters(monitor, target_groups, target_counters, num_target_counters);
+  measure_counters(monitor, target_group1, target_counter1, num_target_counters);
+  // measure_counters(monitor, target_group2, target_counter2, num_target_counters);
 
   // cleanup
   glDeletePerfMonitorsAMD(1, &monitor);

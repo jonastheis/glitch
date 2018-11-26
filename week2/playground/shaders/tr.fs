@@ -19,8 +19,13 @@ vec2 normalize(vec2 v) {
 }
 
 void main(){
-
+	uint tmp = 0u;
 	uint val = 0u;
+
+	val += uint(gl_FragCoord.x);
+	
+	//val += texture(dataTexture, vec2(0, 0));
+
 	//for (int x=0; x < MAX; x += 1) { 
 	//	texCoord = vec2(x/MAX, y/MAX);
 	//	val += texture(dataTexture, texCoord); 
@@ -141,5 +146,5 @@ void main(){
 	val += texture(dataTexture, normalize(vec2(29, 29)));
 	*/
 
-	FragColor = uvec4(val, vec3(0));
+	FragColor = uvec4(gl_FragCoord.x,0,0,0);
 }
