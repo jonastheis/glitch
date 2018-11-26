@@ -20,8 +20,8 @@ using namespace std;
 #define WINDOW_WIDTH 5
 #define WINDOW_HEIGHT 5
 
-#define TEXTURE_WIDTH 32
-#define TEXTURE_HEIGHT 32
+#define TEXTURE_WIDTH 256 
+#define TEXTURE_HEIGHT 256
 
 
 // import global variables from setup phase
@@ -209,11 +209,6 @@ void init_frame_render() {
 
     // create data texture
     auto *data = (uint32_t*) malloc(TEXTURE_WIDTH*TEXTURE_HEIGHT * sizeof(uint32_t));
-    // for (int i = 0; i < TEXTURE_WIDTH; i++) {
-    //   for (int j = 0; j < TEXTURE_HEIGHT; j++) {
-    //     data[i*TEXTURE_WIDTH+j] = i*TEXTURE_WIDTH+j; 
-    //   }
-    // }
     memset(data, 0x01, TEXTURE_HEIGHT*TEXTURE_WIDTH * sizeof(uint32_t));
     createTexture2DUI32(texData, data, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
@@ -302,29 +297,49 @@ int main( int argc, char** argv ) {
   init_groups_counters(&groups, &numGroups, &counters);
 
   // dump the list of counters. use `1` as parameter to get full names
-  // dump_counter_names(1);
+  dump_counter_names(1);
 
   // initialize the opengl render part. creates 5x5 rectangle. 
   init_frame_render();
 
   // determine the counters to be used 
   /* 
+  group[8] = UCHE
+   counters[0] = UCHE_UCHEPERF_VBIF_READ_BEATS_TP
+   counters[1] = UCHE_UCHEPERF_VBIF_READ_BEATS_VFD
+   counters[2] = UCHE_UCHEPERF_VBIF_READ_BEATS_HLSQ
+   counters[3] = UCHE_UCHEPERF_VBIF_READ_BEATS_MARB
+   counters[4] = UCHE_UCHEPERF_VBIF_READ_BEATS_SP
+   counters[5] = UCHE_UCHEPERF_READ_REQUESTS_TP
+   counters[6] = UCHE_UCHEPERF_READ_REQUESTS_VFD
+   counters[7] = UCHE_UCHEPERF_READ_REQUESTS_HLSQ
+   counters[8] = UCHE_UCHEPERF_READ_REQUESTS_MARB
+   counters[9] = UCHE_UCHEPERF_READ_REQUESTS_SP
+   counters[10] = UCHE_UCHEPERF_WRITE_REQUESTS_MARB
+   counters[11] = UCHE_UCHEPERF_WRITE_REQUESTS_SP
+   counters[12] = UCHE_UCHEPERF_TAG_CHECK_FAILS
+   counters[13] = UCHE_UCHEPERF_EVICTS
+   counters[14] = UCHE_UCHEPERF_FLUSHES
+   counters[15] = UCHE_UCHEPERF_VBIF_LATENCY_CYCLES
+   counters[16] = UCHE_UCHEPERF_VBIF_LATENCY_SAMPLES
+   counters[17] = UCHE_UCHEPERF_ACTIVE_CYCLES
   group[9] = TP
-       counters[0] = TPL1_TPPERF_L1_REQUESTS
-       counters[1] = TPL1_TPPERF_TP0_L1_REQUESTS
-       counters[2] = TPL1_TPPERF_TP0_L1_MISSES
-       counters[3] = TPL1_TPPERF_TP1_L1_REQUESTS
-       counters[4] = TPL1_TPPERF_TP1_L1_MISSES
-       counters[5] = TPL1_TPPERF_TP2_L1_REQUESTS
-       counters[6] = TPL1_TPPERF_TP2_L1_MISSES
-       counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
-       counters[8] = TPL1_TPPERF_TP3_L1_MISSES
+   counters[0] = TPL1_TPPERF_L1_REQUESTS
+   counters[1] = TPL1_TPPERF_TP0_L1_REQUESTS
+   counters[2] = TPL1_TPPERF_TP0_L1_MISSES
+   counters[3] = TPL1_TPPERF_TP1_L1_REQUESTS
+   counters[4] = TPL1_TPPERF_TP1_L1_MISSES
+   counters[5] = TPL1_TPPERF_TP2_L1_REQUESTS
+   counters[6] = TPL1_TPPERF_TP2_L1_MISSES
+   counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
+   counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
-  GLuint target_group1[]   = {9, 9, 9, 9}; 
-  GLuint target_counter1[] = {1, 2, 3, 4}; 
+  GLuint target_group1[]   = {8, 9, 9, 8}; 
+  GLuint target_counter1[] = {0, 1, 2, 0}; 
+
   GLuint target_group2[]   = {9, 9, 9, 9}; 
   GLuint target_counter2[] = {5, 6, 7, 8}; 
-  GLuint num_target_counters = 4;
+  GLuint num_target_counters = 3;
 
   // target_groups = &target_groups[4];
   // target_counters = &target_counters[4];
