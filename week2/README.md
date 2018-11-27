@@ -2,11 +2,11 @@
 
 ## How to Run
 
-Same as week1. More info can be found in the local README.md file inside `gpu-cache` [directory](https://github.com/jonastheis/glitch/blob/master/week2/playground/README.md).
+Same as week1. More info can be found in the local [README.md](./gpu-cache/README.md) file inside `gpu-cache` [directory](./gpu-cache/).
 
 ## Counters and Cache line size prediction 
 
-For all experiment, a single point is drawn using `glDrawArrays(GL_POINTS, 0, 1);`. All memory reads are issued from the vertex shader and the fragment shader only outputs a constant value, as suggested in the paper.
+For all experiments, a single point is drawn using `glDrawArrays(GL_POINTS, 0, 1);`. All memory reads are issued from the vertex shader and the fragment shader only outputs a constant value, as suggested in the paper.
 
 For both caches, the essential information needed is the number of total requests and misses (hence, the hits can be concluded trivially). Having this pair of information, the same approach explained in the paper can be used to infer the cache size (nesting two loops and finding the upper bound of the inner loop where the 1/2 ratio breaks). Therefore, we specifically mention how these value (total requests and misses) can be obtained for each cache using AMD counters. 
 
@@ -29,13 +29,12 @@ for all TP units. Essentially:
 
 > In all of our measurement, all four pairs of counters always had the same number of requests/misses. This led us to conclude that they --somehow-- are acting in parallel with an embedded synchrony. This conclusion is also used for the UCHE cache size prediction.
 
-@TODO: 
-For more detailed information, refer to the [vertex shader code]().
+For more detailed information, refer to the [vertex shader code, ll:30-43](./gpu-cache/shaders/tr.vs).
 
 
 #### UCHE (L2) cache size 
 
-The UCHE cache counters are slightly more subtle and the direct hit/miss values are not readily available. After some preliminary experiment, fetching consecutive texels with different strides, the combination of the following counter was identified to be the most informative: 
+The UCHE cache counters are slightly more subtle and the direct hit/miss values are not readily available. After some preliminary experiments, fetching consecutive texels with different strides, the combination of the following counter was identified to be the most informative: 
 
 ```
 group[9] = TP
@@ -50,12 +49,13 @@ Given that the correct stride value of L2 (equal to the UCHE cache line, *16 tex
 
 Based on the above explanation, the number of requests and misses can be inferred. Hence, the same approach is in L1 can be used to craft two loops to infer the cache size of UCHE. 
 
-@TODO: 
-For more detailed information, refer to the [vertex shader code]().
+For more detailed information, refer to the [vertex shader code, ll:45-82](./gpu-cache/shaders/tr.vs).
 
-## Final Plot 
+## Final Plots
 
-@TODO
+![L1 Cache](./gpu-cache/plot/L1cache.png)
+
+![UCHE Cache](./gpu-cache/plot/UCHEcache.png)
 
 ## Appendix: All counters dump file
 

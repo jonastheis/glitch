@@ -1,7 +1,7 @@
 # Run 
 
 - use the all in one `run-it.sh` to compile, transfer and run on a local android device.
-- Compile the code, then use the all in one `prun-it.sh` on a DAS headnode to tranfer all the required files and execute it.
+- Compile the code, then use the all in one `prun-it.sh` on a DAS headnode to transfer all the required files and execute it.
 
 # Resources
 
