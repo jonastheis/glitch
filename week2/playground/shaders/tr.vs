@@ -7,6 +7,7 @@
 
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 uniform sampler2D dataTexture;
+uniform int max;
 
 ivec2 offToPix(int t) {
 		int tile_number = int(t / (TILE*TILE));
@@ -34,12 +35,12 @@ void main()
 
 
 	// STEP2: works with 256, 1/2 ratio breaks on 256+16 => cache size = 256 texels = 1024 KB
-	// for (int i = 0; i < 2 ; i++) {
-	// 	for (int t = 0; t < 256; t += STRIDE) {
-	// 		// val += texelFetch(dataTexture, ivec2(t, 0), 0);
-			// val += texelFetch(dataTexture, offToPix(t), 0);
-	// 	}
-	// }
+	for (int i = 0; i < 2 ; i++) {
+		for (int t = 0; t < max; t += STRIDE) {
+			// val += texelFetch(dataTexture, ivec2(t, 0), 0);
+			val += texelFetch(dataTexture, offToPix(t), 0);
+		}
+	}
 
 	// ------------------------------ UCHE Experiments 
 	// STEP1: Infer the cache line size/
@@ -74,11 +75,11 @@ void main()
 
 	// STEP2: with known L2 cache size 16, touch texels 16 apart, the number of L2 misses ([groupId 8][counterId 0]) is ALWAYS the same 
 	// as the number of texels fetched, regardless of the outer loop. Any value above 8K as the upper bound will break this ratio. 
-	for (int i = 0; i < 2; i++) {
-		for (int t = 0; t < ((8*1024)); t+=STRIDE_UCHE) {
-			val += texelFetch(dataTexture, offToPix(t), 0);
-		}
-	}
+	// for (int i = 0; i < 2; i++) {
+	// 	for (int t = 0; t < ((8*1024)); t+=STRIDE_UCHE) {
+	// 		val += texelFetch(dataTexture, offToPix(t), 0);
+	// 	}
+	// }
 
 
 	
