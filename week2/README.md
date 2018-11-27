@@ -2,7 +2,7 @@
 
 ## How to Run
 
-Same as week1. More info can be found in the local README.md file inside `gpu-cache` [directory](/gpu-cache/README.md).
+Same as week1. More info can be found in the local README.md file inside `gpu-cache` [directory](https://github.com/jonastheis/glitch/blob/master/week2/playground/README.md).
 
 ## Counters and Cache line size prediction 
 
