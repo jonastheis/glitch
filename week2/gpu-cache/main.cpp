@@ -250,65 +250,34 @@ int main( int argc, char** argv ) {
   // initialize the opengl render part including texture
   init_frame_render();
 
-  // determine the counters to be used 
-  /* 
-  group[8] = UCHE
-   counters[0] = UCHE_UCHEPERF_VBIF_READ_BEATS_TP
-   counters[1] = UCHE_UCHEPERF_VBIF_READ_BEATS_VFD
-   counters[2] = UCHE_UCHEPERF_VBIF_READ_BEATS_HLSQ
-   counters[3] = UCHE_UCHEPERF_VBIF_READ_BEATS_MARB
-   counters[4] = UCHE_UCHEPERF_VBIF_READ_BEATS_SP
-   counters[5] = UCHE_UCHEPERF_READ_REQUESTS_TP
-   counters[6] = UCHE_UCHEPERF_READ_REQUESTS_VFD
-   counters[7] = UCHE_UCHEPERF_READ_REQUESTS_HLSQ
-   counters[8] = UCHE_UCHEPERF_READ_REQUESTS_MARB
-   counters[9] = UCHE_UCHEPERF_READ_REQUESTS_SP
-   counters[10] = UCHE_UCHEPERF_WRITE_REQUESTS_MARB
-   counters[11] = UCHE_UCHEPERF_WRITE_REQUESTS_SP
-   counters[12] = UCHE_UCHEPERF_TAG_CHECK_FAILS
-   counters[13] = UCHE_UCHEPERF_EVICTS
-   counters[14] = UCHE_UCHEPERF_FLUSHES
-   counters[15] = UCHE_UCHEPERF_VBIF_LATENCY_CYCLES
-   counters[16] = UCHE_UCHEPERF_VBIF_LATENCY_SAMPLES
-   counters[17] = UCHE_UCHEPERF_ACTIVE_CYCLES
-  group[9] = TP
-   counters[0] = TPL1_TPPERF_L1_REQUESTS
-   counters[1] = TPL1_TPPERF_TP0_L1_REQUESTS
-   counters[2] = TPL1_TPPERF_TP0_L1_MISSES
-   counters[3] = TPL1_TPPERF_TP1_L1_REQUESTS
-   counters[4] = TPL1_TPPERF_TP1_L1_MISSES
-   counters[5] = TPL1_TPPERF_TP2_L1_REQUESTS
-   counters[6] = TPL1_TPPERF_TP2_L1_MISSES
-   counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
-   counters[8] = TPL1_TPPERF_TP3_L1_MISSES
-  */
+  // ----------------------------- L1 -----------------------------
+  GLuint group_L1[]   = {9, 9, 9, 9}; 
+  GLuint counter_L1[] = {1, 2, 5, 6};
+  GLuint num_target_counters = 2;
 
-  // GLuint group_L1[]   = {9, 9, 9, 9}; 
-  // GLuint counter_L1[] = {1, 2, 5, 6};
-  // GLuint num_target_counters = 2;
-
-  // // measure size of L1 -> 64*4B steps
-  // for (int i=64; i<=384; i+=64) {
-  //   perform_measurement(group_L1, counter_L1, num_target_counters, i);
-  // }
-  // // investigate a bit more around 256 Texels == 1KB
-  // for (int i=256; i<=288; i+=4) {
-  //   perform_measurement(group_L1, counter_L1, num_target_counters, i);
-  // }
-
-
-  GLuint group_UCHE[]   = {8, 9, 9, 8}; 
-  GLuint counter_UCHE[] = {0, 1, 2, 0};
-  GLuint num_target_counters = 3; 
-
-  // measure size of UCHE -> 1024*4B== 4KB steps
-  for (int i=1024; i<=10*KB; i+=1024) {
-    perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
+  // measure size of L1 -> 64*4B steps
+  for (int i=64; i<=384; i+=64) {
+    perform_measurement(group_L1, counter_L1, num_target_counters, i);
   }
-  // investigate a bit more around 8*KB texels
-  for (int i=8*KB; i<=9*KB; i+=256) {
-    perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
+  // investigate a bit more around 256 Texels == 1KB
+  for (int i=256; i<=288; i+=4) {
+    perform_measurement(group_L1, counter_L1, num_target_counters, i);
   }
+
+
+  // ----------------------------- UCHE -----------------------------
+  // GLuint group_UCHE[]   = {8, 9, 9, 8}; 
+  // GLuint counter_UCHE[] = {0, 1, 2, 0};
+  // GLuint num_target_counters = 3; 
+
+  // // measure size of UCHE -> 1024*4B== 4KB steps
+  // for (int i=1024; i<=10*KB; i+=1024) {
+  //   perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
+  // }
+  // // investigate a bit more around 8*KB texels
+  // for (int i=8*KB; i<=9*KB; i+=256) {
+  //   perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
+  // }
 
   return 0;
 }
