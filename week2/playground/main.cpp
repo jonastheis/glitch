@@ -283,23 +283,32 @@ int main( int argc, char** argv ) {
    counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
 
-  GLuint group_L1[]   = {9, 9, 9, 9}; 
-  GLuint counter_L1[] = {1, 2, 5, 6};
-  GLuint num_target_counters = 2;
+  // GLuint group_L1[]   = {9, 9, 9, 9}; 
+  // GLuint counter_L1[] = {1, 2, 5, 6};
+  // GLuint num_target_counters = 2;
 
-  // measure size of L1 -> 64*4B steps
-  for (int i=64; i<=384; i+=64) {
-    perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  // // measure size of L1 -> 64*4B steps
+  // for (int i=64; i<=384; i+=64) {
+  //   perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  // }
+  // // investigate a bit more around 256 Texels == 1KB
+  // for (int i=256; i<=288; i+=4) {
+  //   perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  // }
+
+
+  GLuint group_UCHE[]   = {8, 9, 9, 8}; 
+  GLuint counter_UCHE[] = {0, 1, 2, 0};
+  GLuint num_target_counters = 3; 
+
+  // measure size of UCHE -> 1024*4B== 4KB steps
+  for (int i=1024; i<=10*KB; i+=1024) {
+    perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
   }
-  // investigate a bit more around 256 Texels == 1KB
-  for (int i=256; i<=288; i+=4) {
-    perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  // investigate a bit more around 8*KB texels
+  for (int i=8*KB; i<=9*KB; i+=256) {
+    perform_measurement(group_UCHE, counter_UCHE, num_target_counters, i);
   }
-
-
-  // GLuint group_UCHE[]   = {8, 9, 9, 8}; 
-  // GLuint counter_UCHE[] = {0, 1, 2, 0};
-  // GLuint num_target_counters = 3; 
 
   return 0;
 }
