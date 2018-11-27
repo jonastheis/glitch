@@ -50,6 +50,7 @@ typedef struct {
 int          numGroups;
 GLuint       *groups;
 CounterInfo  *counters;
+Shader shader;
 
 void init_groups_counters(GLuint **groupsList, int *numGroups, CounterInfo **counterInfo) {
   GLint          n;
@@ -135,7 +136,7 @@ void init_frame_render() {
     glGenTextures(1, (GLuint*)&textures);
     unsigned int texData = textures[0];
 
-    Shader shader(
+    shader = Shader(
       "/data/local/tmp/papa/shaders/tr.vs",
       "/data/local/tmp/papa/shaders/tr.fs");
 
@@ -269,11 +270,23 @@ int main( int argc, char** argv ) {
 
   GLuint group_L1[]   = {9, 9, 9, 9}; 
   GLuint counter_L1[] = {1, 2, 5, 6};
-  GLuint num_target_counters = 4;
+  GLuint num_target_counters = 2;
 
   // enable counters and monitor
   GLuint monitor;
   glGenPerfMonitorsAMD(1, &monitor);
+
+  shader.setInt("max", 64);
+  measure_counters(monitor, group_L1, counter_L1, num_target_counters);
+  // TODO: add counters for L2
+
+  // cleanup
+  glDeletePerfMonitorsAMD(1, &monitor);
+
+
+  glGenPerfMonitorsAMD(1, &monitor);
+  shader.use();
+  shader.setInt("max", 256);
 
   measure_counters(monitor, group_L1, counter_L1, num_target_counters);
   // TODO: add counters for L2
