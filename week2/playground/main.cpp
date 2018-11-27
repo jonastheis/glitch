@@ -152,9 +152,9 @@ void init_frame_render() {
     glBindTexture(GL_TEXTURE_2D, texData);
 }
 
-void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_counters, GLuint num_target_counters) {
+void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_counters, GLuint num_target_counters, int verbose) {
   GLuint *counterData;
-  printf("+ measuring performance for %d counters.\n", num_target_counters);
+  if (verbose) printf("+ measuring performance for %d counters.\n", num_target_counters);
   for (int i = 0; i < num_target_counters; i++) {
     glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[i], 1, &target_counters[i]);  
   }
@@ -180,19 +180,21 @@ void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_cou
   // get the size of data.
   GLuint resultSize;
   glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_SIZE_AMD, sizeof(GLint), &resultSize, NULL);
-  printf("+ resultSize = [%d]\n", resultSize);
+  if (verbose) printf("+ resultSize = [%d]\n", resultSize);
   counterData = (GLuint*) malloc(resultSize);
 
   // read data
   GLint bytesWritten;
   glGetPerfMonitorCounterDataAMD(monitor, GL_PERFMON_RESULT_AMD, resultSize, counterData, &bytesWritten);
-  printf("+ bytesWritten = %d\n", bytesWritten);
+  if (verbose) printf("+ bytesWritten = %d\n", bytesWritten);
 
-  // print raw data
-  printf("++ Raw Result Data: ");
-  for (int i = 0; i < bytesWritten/(sizeof(GLuint)); i++)
-    printf("[%x] ", *(counterData+i));
-  printf("\n");
+  if (verbose) {
+    // print raw data
+    printf("++ Raw Result Data: ");
+    for (int i = 0; i < bytesWritten/(sizeof(GLuint)); i++)
+      printf("[%x] ", *(counterData+i));
+    printf("\n");
+  }
 
   // print parsed data
   GLsizei wordCount = 0;
@@ -218,6 +220,21 @@ void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_cou
     // else if ( ... ) check for other counter types 
     //   (GL_UNSIGNED_INT and GL_PERCENTAGE_AMD)
   }
+}
+
+void perform_measurement(GLuint* target_groups, GLuint* target_counters, int num_target_counters, int texelLimit) {
+  printf("\n\n######################################\n\n");
+  
+  printf("Texels: %d, Bytes: %d\n", texelLimit, texelLimit*4);
+  // enable counters and monitor
+  GLuint monitor;
+  glGenPerfMonitorsAMD(1, &monitor);
+
+  shader.setInt("max", texelLimit);
+  measure_counters(monitor, target_groups, target_counters, num_target_counters, 0);
+
+  // cleanup
+  glDeletePerfMonitorsAMD(1, &monitor);
 }
 
 int main( int argc, char** argv ) {
@@ -265,34 +282,24 @@ int main( int argc, char** argv ) {
    counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
    counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
-  GLuint group_UCHE[]   = {8, 9, 9, 8}; 
-  GLuint counter_UCHE[] = {0, 1, 2, 0}; 
 
   GLuint group_L1[]   = {9, 9, 9, 9}; 
   GLuint counter_L1[] = {1, 2, 5, 6};
   GLuint num_target_counters = 2;
 
-  // enable counters and monitor
-  GLuint monitor;
-  glGenPerfMonitorsAMD(1, &monitor);
-
-  shader.setInt("max", 64);
-  measure_counters(monitor, group_L1, counter_L1, num_target_counters);
-  // TODO: add counters for L2
-
-  // cleanup
-  glDeletePerfMonitorsAMD(1, &monitor);
+  // measure size of L1 -> 64*4B steps
+  for (int i=64; i<=384; i+=64) {
+    perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  }
+  // investigate a bit more around 256 Texels == 1KB
+  for (int i=256; i<=288; i+=4) {
+    perform_measurement(group_L1, counter_L1, num_target_counters, i);
+  }
 
 
-  glGenPerfMonitorsAMD(1, &monitor);
-  shader.use();
-  shader.setInt("max", 256);
-
-  measure_counters(monitor, group_L1, counter_L1, num_target_counters);
-  // TODO: add counters for L2
-
-  // cleanup
-  glDeletePerfMonitorsAMD(1, &monitor);
+  // GLuint group_UCHE[]   = {8, 9, 9, 8}; 
+  // GLuint counter_UCHE[] = {0, 1, 2, 0};
+  // GLuint num_target_counters = 3; 
 
   return 0;
 }
