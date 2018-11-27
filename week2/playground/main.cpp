@@ -119,10 +119,8 @@ void init_perf_functions() {
   glDeletePerfMonitorsAMD = (PFNGLDELETEPERFMONITORSAMDPROC) eglGetProcAddress("glDeletePerfMonitorsAMD");
 }
 
-void createTexture2DUI32(unsigned int textureId, uint32_t *data, GLuint width, GLuint height) {
+void createTexture2DRGBA(unsigned int textureId, uint32_t *data, GLuint width, GLuint height) {
     glBindTexture(GL_TEXTURE_2D, textureId);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, data);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, data);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -131,77 +129,11 @@ void createTexture2DUI32(unsigned int textureId, uint32_t *data, GLuint width, G
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void createRectangle() {
-    // prepare rectangle
-    float vertices[] = {
-            1,  1, 0.0f,  // top right
-            1, -1, 0.0f,  // bottom right
-            -1, -1, 0.0f,  // bottom left
-            -1,  1, 0.0f   // top left
-    };
-    unsigned int indices[] = {  // note that we start from 0!
-            0, 1, 3,  // first Triangle
-            1, 2, 3   // second Triangle
-    };
-    unsigned int VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // binding one time is sufficient, because there is only 1 object to draw
-    glBindVertexArray(VAO);
-}
-
-void viewFrameBuffer() {
-  // allocate data in memory
-  printf("+ framebuffer = \n");
-    uint32_t *exportData = (uint32_t*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
-    // glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, exportData);
-    // glReadPixels(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA        , GL_UNSIGNED_INT, exportData);
-
-    for (int i = 0; i <WINDOW_WIDTH; ++i) {
-        for (int j = 0; j < WINDOW_HEIGHT; ++j) {
-            printf("%u ", exportData[i+j*WINDOW_WIDTH]);
-        }
-        printf("\n");
-    }
-}
-
 void init_frame_render() {
     // generate textures
-    GLuint textures[2];
-    glGenTextures(2, (GLuint*)&textures);
-    unsigned int texColorBuffer = textures[0];
-    unsigned int texData        = textures[1];
-
-    // allocate framebuffer with texture
-    // unsigned int framebuffer;
-    // glGenFramebuffers(1, &framebuffer);
-    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-    // // set up framebuffer & attached texture
-    // createTexture2DUI32(texColorBuffer, NULL);
-    // // attach it to currently bound framebuffer object
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
-    // // Render to our framebuffer
-    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    // if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-    //     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    // }
-
-    // create rectangle
-    createRectangle();
+    GLuint textures[1];
+    glGenTextures(1, (GLuint*)&textures);
+    unsigned int texData = textures[0];
 
     Shader shader(
       "/data/local/tmp/papa/shaders/tr.vs",
@@ -210,28 +142,26 @@ void init_frame_render() {
     // create data texture
     auto *data = (uint32_t*) malloc(TEXTURE_WIDTH*TEXTURE_HEIGHT * sizeof(uint32_t));
     memset(data, 0x01, TEXTURE_HEIGHT*TEXTURE_WIDTH * sizeof(uint32_t));
-    createTexture2DUI32(texData, data, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
+    createTexture2DRGBA(texData, data, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
     // execute
     shader.use();
-    // set uniforms
-    // glUniform2i(vertexRndLocation, rndX, rndY);
+
+    // bind texture
     glBindTexture(GL_TEXTURE_2D, texData);
 }
 
 void measure_counters (GLuint monitor, GLuint* target_groups, GLuint* target_counters, GLuint num_target_counters) {
   GLuint *counterData;
-  printf("+ measuring performance for %d counters for [%dx%d = %d] shader calls \n", num_target_counters, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_HEIGHT*WINDOW_WIDTH);
+  printf("+ measuring performance for %d counters.\n", num_target_counters);
   for (int i = 0; i < num_target_counters; i++) {
     glSelectPerfMonitorCountersAMD(monitor, GL_TRUE, target_groups[i], 1, &target_counters[i]);  
   }
 
   glBeginPerfMonitorAMD(monitor);
 
+  // draw only 1 point -> shaders get executed just once
   glDrawArrays(GL_POINTS, 0, 1);
-  // viewFrameBuffer();
-  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
   glEndPerfMonitorAMD(monitor);
 
@@ -297,9 +227,9 @@ int main( int argc, char** argv ) {
   init_groups_counters(&groups, &numGroups, &counters);
 
   // dump the list of counters. use `1` as parameter to get full names
-  dump_counter_names(1);
+  // dump_counter_names(1);
 
-  // initialize the opengl render part. creates 5x5 rectangle. 
+  // initialize the opengl render part including texture
   init_frame_render();
 
   // determine the counters to be used 
@@ -334,23 +264,22 @@ int main( int argc, char** argv ) {
    counters[7] = TPL1_TPPERF_TP3_L1_REQUESTS
    counters[8] = TPL1_TPPERF_TP3_L1_MISSES
   */
-  GLuint target_group1[]   = {8, 9, 9, 8}; 
-  GLuint target_counter1[] = {0, 1, 2, 0}; 
+  GLuint group_UCHE[]   = {8, 9, 9, 8}; 
+  GLuint counter_UCHE[] = {0, 1, 2, 0}; 
 
-  GLuint target_group2[]   = {9, 9, 9, 9}; 
-  GLuint target_counter2[] = {5, 6, 7, 8}; 
-  GLuint num_target_counters = 3;
+  GLuint group_L1[]   = {9, 9, 9, 9}; 
+  GLuint counter_L1[] = {1, 2, 5, 6};
+  GLuint num_target_counters = 4;
 
-  // target_groups = &target_groups[4];
-  // target_counters = &target_counters[4];
-  // enable ounters and monitor
+  // enable counters and monitor
   GLuint monitor;
   glGenPerfMonitorsAMD(1, &monitor);
 
-  measure_counters(monitor, target_group1, target_counter1, num_target_counters);
-  // measure_counters(monitor, target_group2, target_counter2, num_target_counters);
+  measure_counters(monitor, group_L1, counter_L1, num_target_counters);
+  // TODO: add counters for L2
 
   // cleanup
   glDeletePerfMonitorsAMD(1, &monitor);
+
   return 0;
 }
