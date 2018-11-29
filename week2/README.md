@@ -17,7 +17,7 @@ To infer the L1 cache size, the following counters are used:
 ```
 group[9] = TP
     counters[1] = TPL1_TPPERF_TP0_L1_REQUESTS
-       counters[2] = TPL1_TPPERF_TP0_L1_MISSES
+    counters[2] = TPL1_TPPERF_TP0_L1_MISSES
     ...
 ```
 

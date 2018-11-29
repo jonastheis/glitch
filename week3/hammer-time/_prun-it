@@ -1,0 +1,20 @@
+#!/bin/bash
+
+TEAM=papa
+BINARY_NAME=main.out
+LOCAL_BIN_PATH=obj/local/armeabi-v7a/$BINARY_NAME
+TARGET_BIN_PATH=/data/local/tmp/$TEAM/$BINARY_NAME
+
+echo "--- COPYING CODE TO DEVICE" 
+adb push $LOCAL_BIN_PATH $TARGET_BIN_PATH 
+
+echo "--- COPYING SAHDERS TO DEVICE" 
+adb push ./shaders/tr.fs /data/local/tmp/$TEAM/shaders/tr.fs
+adb push ./shaders/tr.vs /data/local/tmp/$TEAM/shaders/tr.vs
+
+echo "--- CHANGING PERMISSION" 
+adb shell su -c chmod 777 $TARGET_BIN_PATH
+
+echo "--- RUNNING"
+adb shell su -c $TARGET_BIN_PATH
+echo "--- DONE"

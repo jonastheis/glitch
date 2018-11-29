@@ -1,0 +1,3 @@
+#!/bin/bash
+
+prun -native "-p expq -C glitch" -np 1 bash _prun-it
