@@ -96,7 +96,7 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
   glGenTextures(NUM_BLANK_TEXTURES, textures);
   for (int i = 0; i < NUM_BLANK_TEXTURES; i++) {
     GLuint *tData = (GLuint*) malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-    memset((void *)tData, i%(0xff), PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+    memset((void *)tData, textures[i]%(0x100), PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
     createTexture2DRGBA(textures[i], tData, PAGE_TEXTURE_W, PAGE_TEXTURE_H);
 
     // TODO: is this needed or not? 

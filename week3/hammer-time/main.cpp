@@ -16,6 +16,8 @@
 using namespace std;
 
 Shader shader;
+unsigned int framebuffer;
+
 void init_opengl_setup() {
   // generate textures
   GLuint textures[1];
@@ -33,6 +35,47 @@ void init_opengl_setup() {
   glBindTexture(GL_TEXTURE_2D, texData);
 }
 
+void view_texture(unsigned int textureId) {
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  // attach it to currently bound framebuffer object
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+      std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+  }
+
+  // allocate data in memory
+  auto *exportData = (unsigned char*)malloc(KB4);
+  glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RGBA, GL_UNSIGNED_BYTE, exportData);
+
+  for (int i = 0; i <KB4; i++) {
+    if (i % 32 == 0) {
+       printf("\n");
+     }
+     printf("%u ", exportData[i]);
+  }
+  printf("\n");
+
+  free(exportData);
+}
+
+void init_framebuffer() {
+  // allocate framebuffer
+  glGenFramebuffers(1, &framebuffer);
+}
+
+void fill_texture(unsigned int textureId, unsigned char value) {
+  auto *data = (unsigned char*)malloc(KB4);
+  memset((void *)data, value, KB4);
+
+  // write special values to texture
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  free(data);
+}
+
 int main( int argc, char** argv ) {
   egl_setup();
 
@@ -44,11 +87,16 @@ int main( int argc, char** argv ) {
   allocate_cont(48, KB4, &cont_entries[0]);
   print_entries(cont_entries, 0, 4);
 
-  glBindTexture(GL_TEXTURE_2D, 5);
-  GLuint *tData = (GLuint *)malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-  memset((void *)tData, 0, PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-  glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RED_INTEGER, GL_UNSIGNED_INT, tData);
-  printf("+++ probe value => %u\n", tData[0]);
+  // test reading and writing to textures
+  init_framebuffer();
+
+  view_texture(cont_entries[0].texture_id);
+  fill_texture(cont_entries[0].texture_id, 0);
+  view_texture(cont_entries[0].texture_id);
+
+  view_texture(cont_entries[1].texture_id);
+  fill_texture(cont_entries[1].texture_id, 1);
+  view_texture(cont_entries[1].texture_id);
 
   // executes the shader 
   glDrawArrays(GL_POINTS, 0, 1);
