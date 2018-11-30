@@ -13,14 +13,9 @@
 #include "mem_util.h"
 #include "size.h"
 
-#define TARGET_PFNS 48
-#define PAGE_TEXTURE_W 32
-#define PAGE_TEXTURE_H 32
-
 KGSLEntry *entries;
 
-int
-sort_by_id(const void *v1, const void *v2) {
+int sort_by_id(const void *v1, const void *v2) {
   const KGSLEntry *p1 = (KGSLEntry *)v1;
   const KGSLEntry *p2 = (KGSLEntry *)v2;
   if (p1->id < p2->id)
@@ -31,14 +26,67 @@ sort_by_id(const void *v1, const void *v2) {
     return 0;
 }
 
-void print_entries(KGSLEntry entries[], int start_idx, int num_to_print)
-{
+void print_entries(KGSLEntry entries[], int start_idx, int num_to_print) {
   for (int i = 0; i < num_to_print; i++)
   {
-    printf("+ KGSLEntry[%d+%d=%d] = {id: %d, useraddr: %x, pfn: %jx, alloc_order: %d}\n", start_idx, i, start_idx + i,
-           entries[start_idx + i].id, entries[start_idx + i].useraddr, entries[start_idx + i].pfn, entries[start_idx + i].alloc_order);
+    printf("+ KGSLEntry[%d+%d=%d] = {id: %d, texture_id: %d, useraddr: %x, pfn: %jx, alloc_order: %d}\n", start_idx, i, start_idx + i,
+           entries[start_idx + i].id, entries[start_idx + i].texture_id, entries[start_idx + i].useraddr, entries[start_idx + i].pfn, entries[start_idx + i].alloc_order);
   }
 }
+
+void createTexture2DRGBA(unsigned int textureId, uint32_t *data, GLuint width, GLuint height)
+{
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+int get_first_index() {
+  GLuint textures[1];
+  glGenTextures(1, textures);
+  GLuint *tData = (GLuint *)malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+  memset((void *)tData, 0x41, PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, PAGE_TEXTURE_W, PAGE_TEXTURE_H, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, tData);
+  free(tData);
+
+  pid_t pid = getpid();
+  char tmp[128];
+  snprintf(tmp, sizeof(tmp), "/d/kgsl/proc/%d/mem", pid);
+  char line[1024];
+
+  FILE *fp = fopen(tmp, "r");
+  if (fp == 0)
+  {
+    printf("Unable to open kgsl file\n");
+    exit(1);
+  }
+  int max_id = 0;
+  while (1) {
+    char usage[20];
+    uint32_t useraddr;
+    int id;
+    int ret;
+
+    if (fgets(line, sizeof(line), fp) == NULL) break;
+    ret = sscanf(line, "%*s %x %*s %d %*s %*s %s %*s\n", &useraddr, &id, usage);
+    if (ret != 3) continue;
+
+    // printf("%s", line);
+
+    if (strcmp(usage, "texture") == 0) {
+      if (id > max_id ) {
+        max_id = id;
+      }
+    }
+  }
+  return max_id - textures[0];
+}
+
 
 int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *num_created_before) {
   int return_index = 0;
@@ -48,15 +96,14 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
   glGenTextures(NUM_BLANK_TEXTURES, textures);
   for (int i = 0; i < NUM_BLANK_TEXTURES; i++) {
     GLuint *tData = (GLuint*) malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-    memset((void *)tData, 0x41, PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, PAGE_TEXTURE_W, PAGE_TEXTURE_H, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, tData);
+    memset((void *)tData, i%(0xff), PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+    createTexture2DRGBA(textures[i], tData, PAGE_TEXTURE_W, PAGE_TEXTURE_H);
+
     // TODO: is this needed or not? 
     free(tData);
   }
 
   // read kgsl file to filter the textures
-  // relax a bit for now: the first NUM_BLANK_TEXTURES textures are the ones that we are interested in
   if ( *num_created_before == 0 ) {
     entries = (KGSLEntry*) malloc((NUM_BLANK_TEXTURES + 4) * sizeof(KGSLEntry));
   }
@@ -77,8 +124,7 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
     exit(1);
   }
 
-  while (1)
-  {
+  while (1) {
     char usage[20];
     uint32_t useraddr;
     int id;
@@ -88,8 +134,9 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
     ret = sscanf(line, "%*s %x %*s %d %*s %*s %s %*s\n", &useraddr, &id, usage);
     if (ret != 3) continue;
 
-    if (strcmp(usage, "texture") == 0)
-    {
+    // printf("%s", line);
+
+    if (strcmp(usage, "texture") == 0) {
       KGSLEntry entry;
       PagemapEntry texture_pagemap;
       pagemap_get_entry(&texture_pagemap, (uintptr_t)useraddr);
@@ -141,7 +188,7 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
     return 0;
   }
 
-  printf("%d %d %d .... %d %d %d\n", textures[0], textures[1], textures[2], textures[NUM_BLANK_TEXTURES-3], textures[NUM_BLANK_TEXTURES-2], textures[NUM_BLANK_TEXTURES-1]);
+  // printf("%d %d %d .... %d %d %d\n", textures[0], textures[1], textures[2], textures[NUM_BLANK_TEXTURES-3], textures[NUM_BLANK_TEXTURES-2], textures[NUM_BLANK_TEXTURES-1]);
   printf("[Allocator] + Target memory region found. \n");
   return return_index;
 }
@@ -150,6 +197,8 @@ int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
   int NUM_BLANK_TEXTURES = KB4;
   int before = 0;
 
+  int offset = get_first_index();
+  
   int idx = _allocate_cont(num_pages, page_size, NUM_BLANK_TEXTURES, &before);
   while(!idx) {
     printf("--- Failed [%d created]\n", before);
@@ -157,6 +206,10 @@ int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
     idx = _allocate_cont(num_pages, page_size, NUM_BLANK_TEXTURES, &before);
   }
   
+  for (int i = 0; i < num_pages; i++) {
+    entries[idx].texture_id = entries[idx].id - offset;
+  }
   memcpy(ret_entries, &entries[idx], num_pages*sizeof(KGSLEntry));
+  
   return 0;
 }

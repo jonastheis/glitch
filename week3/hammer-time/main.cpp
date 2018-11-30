@@ -44,6 +44,12 @@ int main( int argc, char** argv ) {
   allocate_cont(48, KB4, &cont_entries[0]);
   print_entries(cont_entries, 0, 4);
 
+  glBindTexture(GL_TEXTURE_2D, 5);
+  GLuint *tData = (GLuint *)malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+  memset((void *)tData, 0, PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+  glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RED_INTEGER, GL_UNSIGNED_INT, tData);
+  printf("+++ probe value => %u\n", tData[0]);
+
   // executes the shader 
   glDrawArrays(GL_POINTS, 0, 1);
 

@@ -7,8 +7,7 @@
 
 #include "mem_util.h"
 
-int pagemap_get_entry(PagemapEntry *entry, uintptr_t vaddr)
-{
+int pagemap_get_entry(PagemapEntry *entry, uintptr_t vaddr) {
     int pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
     size_t nread;
     size_t ret;

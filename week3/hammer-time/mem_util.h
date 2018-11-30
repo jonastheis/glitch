@@ -13,6 +13,7 @@ typedef struct {
     char usage[20];
     int id;
     int alloc_order;
+    int texture_id;
     uint64_t pfn;
 } KGSLEntry;
 
