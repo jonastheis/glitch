@@ -207,7 +207,7 @@ int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
   }
   
   for (int i = 0; i < num_pages; i++) {
-    entries[idx].texture_id = entries[idx].id - offset;
+    entries[idx+i].texture_id = entries[idx+i].id - offset;
   }
   memcpy(ret_entries, &entries[idx], num_pages*sizeof(KGSLEntry));
   
