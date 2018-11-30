@@ -36,14 +36,15 @@ void init_opengl_setup() {
 int main( int argc, char** argv ) {
   egl_setup();
 
-  // second parameter is igonerd for now
+  // initialize the opengl render and a framebuffer
+  init_opengl_setup();
+
+  // second parameter is ignored for now
   KGSLEntry cont_entries[48];
   allocate_cont(48, KB4, &cont_entries[0]);
   print_entries(cont_entries, 0, 4);
 
-  // initialize the opengl render and a framebuffer
-  init_opengl_setup();
-
+  // executes the shader 
   glDrawArrays(GL_POINTS, 0, 1);
 
   return 0;
