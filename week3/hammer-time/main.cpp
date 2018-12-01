@@ -49,7 +49,7 @@ void view_texture(unsigned int textureId) {
      if ( i % 4 == 0 ) {
        printf("  ");
      }
-     printf("%u,", exportData[i]);
+     printf("%x,", exportData[i]);
   }
   printf("\n");
 
@@ -166,6 +166,48 @@ void bind_hammer_textures() {
   }
 
 }
+void prepare_hammer_time() {
+  // second parameter is ignored for now
+  KGSLEntry cont_entries[48];
+  allocate_cont(48, KB4, &cont_entries[0]);
+  // print_entries(cont_entries, 0, 48);
+
+  // example for hammering first bank x=hammer, .=eviction
+  //  0001 0203 0405 0607 0809 1011 1213 1415
+  // |xxxx|----|----|----|----|--..|....|....|
+  //  1617 1819 2021 2223 2425 2627 2829 3031
+  // |----|----|----|----|----|----|----|----|
+  //  3233 3435 3637 3839 4041 4243 4445 4647
+  // |xxxx|----|----|----|----|----|----|----|
+
+  // fill textures in row n-1, n+1 with 0
+  int offset = 0;
+  fill_texture(cont_entries[offset + 0].texture_id, 0x00);
+  fill_texture(cont_entries[offset + 1].texture_id, 0x00);
+
+  fill_texture(cont_entries[offset + 32].texture_id, 0x00);
+  fill_texture(cont_entries[offset + 33].texture_id, 0x00);
+
+  // fill textures in row n with 1
+  fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
+  fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
+
+  // TODO: pass hammer textures
+
+  // select 5 textures for eviction
+  if (offset < 8) {
+    // take 5 textures from end of first row 
+    // TODO: 11,12,13,14,15
+  } else {
+    // take 5 textures from beginning of first row
+    // TODO: 0,1,2,3,4
+  }
+
+  // check hammered textures for bit flip
+  view_texture(cont_entries[offset + 16].texture_id);
+  view_texture(cont_entries[offset + 17].texture_id);
+}
+
 int main( int argc, char** argv ) {
   egl_setup();
 
@@ -173,34 +215,22 @@ int main( int argc, char** argv ) {
   init_opengl_setup();
   counters_init();
 
-  // second parameter is ignored for now
-  // KGSLEntry cont_entries[48];
-  // allocate_cont(48, KB4, &cont_entries[0]);
-  // print_entries(cont_entries, 0, 4);
-
-  // test reading and writing to textures
-  // init_framebuffer();
-
-  // view_texture(cont_entries[0].texture_id);
-  // fill_texture(cont_entries[0].texture_id, 0);
-  // view_texture(cont_entries[0].texture_id);
-
-  // view_texture(cont_entries[1].texture_id);
-  // fill_texture(cont_entries[1].texture_id, 1);
-  // view_texture(cont_entries[1].texture_id);
-
-  // executes the shader 
-  init_debug();
-  bind_hammer_textures();
-
+  // Option1) debug shader output with framebuffer
+  // init_debug();
   // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   // view_framebuffer();
+
+  // Option2) Execute 1 pixel
   // glDrawArrays(GL_POINTS, 0, 1);
 
   GLuint group_UCHE[]   = {8, 9, 9};
   GLuint counter_UCHE[] = {0, 1, 2};
   GLuint num_target_counters = 3;
   perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
+
+  // init framebuffer to check for bit flips
+  // init_framebuffer();
+  // prepare_hammer_time();
 
   return 0;
 }
