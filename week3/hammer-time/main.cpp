@@ -42,16 +42,29 @@ void view_texture(unsigned int textureId) {
   auto *exportData = (unsigned char*)malloc(KB4);
   glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RGBA, GL_UNSIGNED_BYTE, exportData);
 
-  for (int i = 0; i <KB4; i++) {
-    if (i % 32 == 0) {
-       printf("\n");
-     }
-     if ( i % 4 == 0 ) {
-       printf("  ");
-     }
-     printf("%x,", exportData[i]);
+  // for (int i = 0; i <KB4; i++) {
+  //   if (i % 32 == 0) {
+  //      printf("\n");
+  //    }
+  //    if ( i % 4 == 0 ) {
+  //      printf("  ");
+  //    }
+  //    printf("%x,", exportData[i]);
+  // }
+  // printf("\n");
+
+  int flip = 0;
+  for (int i = 0; i < KB4; i++)
+  {
+    if (exportData[i] != 0xff)
+    {
+      printf("++++ [%u] BIT FLIP IDENTIFIED [%d]!\n", textureId, i);
+      flip = 1;
+    }
   }
-  printf("\n");
+  if (!flip) {
+    printf("---- [%u] No Flip For You!\n", textureId);
+  }
 
   free(exportData);
 }
@@ -148,12 +161,14 @@ void view_framebuffer() {
     printf("%u,", exportData[i]);
   }
   printf("\n");
+  free(exportData);
 }
+
 
 void bind_texture(unsigned int textureId, int i, char type, int offset) {
   char temp[20];
   sprintf(temp, "%cTex0%d", type, i);
-  printf("++ Binding [%s] %d=[%d] -- offset: %d\n", temp, textureId, textureId%256, offset);
+  // printf("++ Binding [%s] %d=[%d] -- offset: %d\n", temp, textureId, textureId%256, offset);
 
   GLuint uUniform = glGetUniformLocation(shader.ID, temp);
   glActiveTexture(GL_TEXTURE0 + i);
@@ -169,8 +184,8 @@ void bind_hammer_textures() {
   for (int i = 0; i < 10; i ++ ) {
     bind_texture(cont_entries[i].texture_id, i, 'H', i);
   }
-
 }
+
 void prepare_hammer_time() {
   // second parameter is ignored for now
   KGSLEntry cont_entries[48];
@@ -186,68 +201,72 @@ void prepare_hammer_time() {
   // |xxxx|----|----|----|----|----|----|----|
 
   // fill textures in row n-1, n+1 with 0
-  int offset = 0;
-  fill_texture(cont_entries[offset + 0].texture_id, 0x00);
-  fill_texture(cont_entries[offset + 1].texture_id, 0x00);
+  for (int offset = 0; offset < 16; offset += 2) {
+    fill_texture(cont_entries[offset + 0].texture_id, 0x00);
+    fill_texture(cont_entries[offset + 1].texture_id, 0x00);
 
-  fill_texture(cont_entries[offset + 32].texture_id, 0x00);
-  fill_texture(cont_entries[offset + 33].texture_id, 0x00);
+    fill_texture(cont_entries[offset + 32].texture_id, 0x00);
+    fill_texture(cont_entries[offset + 33].texture_id, 0x00);
 
-  // fill textures in row n with 1
-  fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
-  fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
+    // fill textures in row n with 1
+    fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
+    fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
 
-  // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
-  bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
-  bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
-  bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
-  bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
+    // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
+    bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
+    bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
+    bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
+    bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
 
-  // select 5 textures for eviction
-  if (offset < 8) {
-    // take 5 textures from end of first row: 11,12,13,14,15
-    for(int i=0; i<5; i++) {
-      bind_texture(cont_entries[11+i].texture_id, 4+i, 'I', 11+i);
+    // select 5 textures for eviction
+    if (offset < 8)
+    {
+      // take 5 textures from end of first row: 11,12,13,14,15
+      for (int i = 0; i < 5; i++)
+      {
+        bind_texture(cont_entries[11 + i].texture_id, 4 + i, 'H', 11 + i);
+      }
     }
-  } else {
-    // take 5 textures from beginning of first row: 0,1,2,3,4
-    for(int i=0; i<5; i++) {
-      bind_texture(cont_entries[i].texture_id, 4+i, 'I', i);
+    else
+    {
+      // take 5 textures from beginning of first row: 0,1,2,3,4
+      for (int i = 0; i < 5; i++)
+      {
+        bind_texture(cont_entries[i].texture_id, 4 + i, 'H', i);
+      }
     }
+    // important: bind dummy texture last to prevent last texture error
+    bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
+
+    // check hammered textures for bit flip
+    view_texture(cont_entries[offset + 16].texture_id);
+    view_texture(cont_entries[offset + 17].texture_id);
   }
-  // important: bind dummy texture last to prevent last texture error
-  bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
-
-  // check hammered textures for bit flip
-  // view_texture(cont_entries[offset + 16].texture_id);
-  // view_texture(cont_entries[offset + 17].texture_id);
 }
 
 int main( int argc, char** argv ) {
   egl_setup();
-
-  // initialize the opengl render and a framebuffer
   init_opengl_setup();
-  counters_init();
-
+  init_framebuffer();
   prepare_hammer_time();
 
+
+  // ---------------------- Testing Setups ----------------------
   // Option1) debug shader output with framebuffer
-  init_debug();
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  view_framebuffer();
+  // init_debug();
+  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  // view_framebuffer();
 
   // Option2) Execute 1 pixel
-  // glDrawArrays(GL_POINTS, 0, 1);
+  glDrawArrays(GL_POINTS, 0, 1);
 
+  // Option3) Execute 1 pixel with counters 
+  // counters_init();
   // GLuint group_UCHE[]   = {8, 9, 9};
   // GLuint counter_UCHE[] = {0, 1, 2};
   // GLuint num_target_counters = 3;
   // perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
 
-  // init framebuffer to check for bit flips
-  // init_framebuffer();
-  // prepare_hammer_time();
 
   return 0;
 }

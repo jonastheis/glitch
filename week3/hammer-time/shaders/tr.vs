@@ -9,11 +9,12 @@ uniform sampler2D HTex00;
 uniform sampler2D HTex01;
 uniform sampler2D HTex02;
 uniform sampler2D HTex03;
-uniform sampler2D ITex04;
-uniform sampler2D ITex05;
-uniform sampler2D ITex06;
-uniform sampler2D ITex07;
-uniform sampler2D ITex08;
+uniform sampler2D HTex04;
+uniform sampler2D HTex05;
+uniform sampler2D HTex06;
+uniform sampler2D HTex07;
+uniform sampler2D HTex08;
+
 // bind dummy texture last to prevent last texture error - do not use
 uniform sampler2D DTex09;
 
@@ -33,14 +34,13 @@ ivec2 offToPix(int t) {
 
 float hammerIt() {
     float val;
-    for (int i = 0; i < 1; i++) {
-        val += texelFetch(HTex00, ivec2(0,0), 0).r;
-    }
 
     // these 7 will fill the UCHE cache set
+    val += texelFetch(HTex00, ivec2(0,0), 0).r;
     val += texelFetch(HTex01, ivec2(0,0), 0).r;
     val += texelFetch(HTex02, ivec2(0,0), 0).r;
     val += texelFetch(HTex03, ivec2(0,0), 0).r;
+
     val += texelFetch(HTex04, ivec2(0,0), 0).r;
     val += texelFetch(HTex05, ivec2(0,0), 0).r;
     val += texelFetch(HTex06, ivec2(0,0), 0).r;
@@ -54,17 +54,18 @@ float hammerIt() {
     val += texelFetch(HTex01, ivec2(0,2), 0).r;
     val += texelFetch(HTex02, ivec2(0,2), 0).r;
     val += texelFetch(HTex03, ivec2(0,2), 0).r;
+
     val += texelFetch(HTex04, ivec2(0,2), 0).r;
     val += texelFetch(HTex05, ivec2(0,2), 0).r;
     val += texelFetch(HTex06, ivec2(0,2), 0).r;
-    // // this will kick out HText00 from L1
     val += texelFetch(HTex07, ivec2(0,2), 0).r;
+    // // this will kick out HText00 from L1
     val += texelFetch(HTex08, ivec2(0,2), 0).r;
 
-    // // finally, we access this again and it will be treated as a new read from DRAM
-    for (int i = 0; i < 1; i++) {
-        val += texelFetch(HTex00, ivec2(0,0), 0).r;
-    }
+    // // // finally, we access this again and it will be treated as a new read from DRAM
+    // for (int i = 0; i < 1; i++) {
+    //     val += texelFetch(HTex00, ivec2(0,0), 0).r;
+    // }
     return val;
 }
 
@@ -74,13 +75,13 @@ void main() {
 
     // final hammer loop 
     float temp = 0.0;
-    // for (int h = 0; h < HAMMER; h++ ) {
-    //     temp += hammerIt();
-    // }
+    for (int h = 0; h < HAMMER; h++ ) {
+        temp += hammerIt();
+    }
 
     // single hammer
-    float val = hammerIt();
-    temp += val;
+    // float val = hammerIt();
+    // temp += val;
 
     gl_Position = vec4(aPos, temp);
 }
