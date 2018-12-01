@@ -194,7 +194,7 @@ void measure_counters(GLuint monitor, GLuint *target_groups, GLuint *target_coun
 
 void perform_measurement(GLuint *target_groups, GLuint *target_counters, int num_target_counters)
 {
-  printf("\n\n######################################\n\n");
+  printf("+++ Performing Measurements");
 
   // enable counters and monitor
   GLuint monitor;
