@@ -9,12 +9,13 @@ uniform sampler2D HTex00;
 uniform sampler2D HTex01;
 uniform sampler2D HTex02;
 uniform sampler2D HTex03;
-uniform sampler2D HTex04;
-uniform sampler2D HTex05;
-uniform sampler2D HTex06;
-uniform sampler2D HTex07;
-uniform sampler2D HTex08;
-uniform sampler2D HTex09;
+uniform sampler2D ITex04;
+uniform sampler2D ITex05;
+uniform sampler2D ITex06;
+uniform sampler2D ITex07;
+uniform sampler2D ITex08;
+// bind dummy texture last to prevent last texture error - do not use
+uniform sampler2D DTex09;
 
 ivec2 offToPix(int t) {
 		int tile_number = int(t / (TILE*TILE));

