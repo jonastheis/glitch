@@ -1,6 +1,6 @@
 #version 300 es
-out uvec4 FragColor;
+out vec4 FragColor;
 
 void main(){
-	FragColor = uvec4(0,0,0,0);
+	FragColor = vec4(0.5,0,0,0);
 }
