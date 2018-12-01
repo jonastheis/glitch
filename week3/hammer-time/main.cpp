@@ -12,6 +12,7 @@
 #include "eglSetup.h"
 #include "shader.cpp"
 #include "allocator.h"
+#include "counters.h"
 
 using namespace std;
 
@@ -19,11 +20,6 @@ Shader shader;
 unsigned int framebuffer;
 
 void init_opengl_setup() {
-  // generate textures
-  GLuint textures[1];
-  glGenTextures(1, (GLuint *)&textures);
-  unsigned int texData = textures[0];
-
   shader = Shader(
       "/data/local/tmp/papa/shaders/tr.vs",
       "/data/local/tmp/papa/shaders/tr.fs");
@@ -31,8 +27,6 @@ void init_opengl_setup() {
   // execute
   shader.use();
 
-  // bind texture
-  glBindTexture(GL_TEXTURE_2D, texData);
 }
 
 void view_texture(unsigned int textureId) {
@@ -52,7 +46,10 @@ void view_texture(unsigned int textureId) {
     if (i % 32 == 0) {
        printf("\n");
      }
-     printf("%u ", exportData[i]);
+     if ( i % 4 == 0 ) {
+       printf("  ");
+     }
+     printf("%u,", exportData[i]);
   }
   printf("\n");
 
@@ -140,19 +137,41 @@ void view_framebuffer() {
   glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RGBA, GL_UNSIGNED_BYTE, exportData);
 
   for (int i = 0; i <KB4; i++) {
-    if (i % 32 == 0) {
-       printf("\n");
-     }
-     printf("%u ", exportData[i]);
+    if (i % 32 == 0)
+    {
+      printf("\n");
+    }
+    if (i % 4 == 0)
+    {
+      printf("  ");
+    }
+    printf("%u,", exportData[i]);
   }
   printf("\n");
 }
 
+void bind_hammer_textures() {
+  KGSLEntry cont_entries[48];
+  allocate_cont(48, KB4, &cont_entries[0]);
+  print_entries(cont_entries, 0, 8);
+
+  for (int i = 0; i < 10; i ++ ) {
+    char temp[20];
+    sprintf(temp, "HTex0%d", i);
+    printf("++ Binding [%s] [%d]\n", temp, cont_entries[i].texture_id%256);
+    GLuint uUniform = glGetUniformLocation(shader.ID, temp);
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(GL_TEXTURE_2D, cont_entries[i].texture_id);
+    glUniform1i(uUniform, i);
+  }
+
+}
 int main( int argc, char** argv ) {
   egl_setup();
 
   // initialize the opengl render and a framebuffer
   init_opengl_setup();
+  counters_init();
 
   // second parameter is ignored for now
   // KGSLEntry cont_entries[48];
@@ -171,10 +190,17 @@ int main( int argc, char** argv ) {
   // view_texture(cont_entries[1].texture_id);
 
   // executes the shader 
-  // glDrawArrays(GL_POINTS, 0, 1);
   init_debug();
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  bind_hammer_textures();
 
-  view_framebuffer();
+  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  // view_framebuffer();
+  // glDrawArrays(GL_POINTS, 0, 1);
+
+  GLuint group_UCHE[]   = {8, 9, 9};
+  GLuint counter_UCHE[] = {0, 1, 2};
+  GLuint num_target_counters = 3;
+  perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
+
   return 0;
 }
