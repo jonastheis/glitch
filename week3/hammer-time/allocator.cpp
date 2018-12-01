@@ -124,6 +124,7 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES, int *nu
     exit(1);
   }
 
+  printf("HEre\n");
   while (1) {
     char usage[20];
     uint32_t useraddr;

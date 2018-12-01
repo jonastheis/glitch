@@ -18,6 +18,7 @@ using namespace std;
 
 Shader shader;
 unsigned int framebuffer;
+KGSLEntry cont_entries[64];
 
 void init_opengl_setup() {
   shader = Shader(
@@ -176,20 +177,9 @@ void bind_texture(unsigned int textureId, int i, char type, int offset) {
   glUniform1i(uUniform, i);
 }
 
-void bind_hammer_textures() {
-  KGSLEntry cont_entries[48];
-  allocate_cont(48, KB4, &cont_entries[0]);
-  print_entries(cont_entries, 0, 8);
-
-  for (int i = 0; i < 10; i ++ ) {
-    bind_texture(cont_entries[i].texture_id, i, 'H', i);
-  }
-}
-
-void prepare_hammer_time() {
+void _prepare_hammer_time() {
   // second parameter is ignored for now
-  KGSLEntry cont_entries[48];
-  allocate_cont(48, KB4, &cont_entries[0]);
+  
   // print_entries(cont_entries, 0, 48);
 
   // example for hammering first bank x=hammer, .=eviction
@@ -244,10 +234,21 @@ void prepare_hammer_time() {
   }
 }
 
+void prepare_hammer_time()
+{
+  for (int i = 0; i < 1; i++)
+  {
+    allocate_cont(48, KB4, &cont_entries[0]);
+    _prepare_hammer_time();
+    glDrawArrays(GL_POINTS, 0, 1);
+  }
+}
+
 int main( int argc, char** argv ) {
   egl_setup();
   init_opengl_setup();
   init_framebuffer();
+
   prepare_hammer_time();
 
 
@@ -258,7 +259,7 @@ int main( int argc, char** argv ) {
   // view_framebuffer();
 
   // Option2) Execute 1 pixel
-  glDrawArrays(GL_POINTS, 0, 1);
+  // glDrawArrays(GL_POINTS, 0, 1);
 
   // Option3) Execute 1 pixel with counters 
   // counters_init();
