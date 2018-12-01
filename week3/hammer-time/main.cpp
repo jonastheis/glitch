@@ -60,6 +60,7 @@ void view_texture(unsigned int textureId) {
     if (exportData[i] != 0xff)
     {
       printf("++++ [%u] BIT FLIP IDENTIFIED [%d]!\n", textureId, i);
+      exit(0);
       flip = 1;
     }
   }
@@ -178,10 +179,6 @@ void bind_texture(unsigned int textureId, int i, char type, int offset) {
 }
 
 void _prepare_hammer_time() {
-  // second parameter is ignored for now
-  
-  // print_entries(cont_entries, 0, 48);
-
   // example for hammering first bank x=hammer, .=eviction
   //  0001 0203 0405 0607 0809 1011 1213 1415
   // |xxxx|----|----|----|----|--..|....|....|
@@ -236,9 +233,10 @@ void _prepare_hammer_time() {
 
 void prepare_hammer_time()
 {
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < 400000; i++)
   {
     allocate_cont(48, KB4, &cont_entries[0]);
+    print_entries(cont_entries, 0, 4);
     _prepare_hammer_time();
     glDrawArrays(GL_POINTS, 0, 1);
   }

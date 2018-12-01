@@ -3,7 +3,7 @@ layout (location = 0) in vec3 aPos; // the position variable has attribute posit
 
 #define TEXTURE_SIZE 32
 #define TILE 4
-#define HAMMER 2000000
+#define HAMMER 8000000
 
 uniform sampler2D HTex00;
 uniform sampler2D HTex01;
@@ -74,14 +74,45 @@ void main() {
     // -------------------- POC for the efficient cache eviction     
 
     // final hammer loop 
-    float temp = 0.0;
+    float val = 0.0;
     for (int h = 0; h < HAMMER; h++ ) {
-        temp += hammerIt();
+
+        // these 7 will fill the UCHE cache set
+        val += texelFetch(HTex00, ivec2(0,0), 0).r;
+        val += texelFetch(HTex01, ivec2(0,0), 0).r;
+        val += texelFetch(HTex02, ivec2(0,0), 0).r;
+        val += texelFetch(HTex03, ivec2(0,0), 0).r;
+
+        val += texelFetch(HTex04, ivec2(0,0), 0).r;
+        val += texelFetch(HTex05, ivec2(0,0), 0).r;
+        val += texelFetch(HTex06, ivec2(0,0), 0).r;
+        val += texelFetch(HTex07, ivec2(0,0), 0).r;
+        // // this will kick out HText00 from UCHE
+        val += texelFetch(HTex08, ivec2(0,0), 0).r;
+        
+        // These 7 will fill the rest of the L1 set.
+        // NOTE: evicting L1 is already a new access to DRAM. 
+        val += texelFetch(HTex00, ivec2(0,2), 0).r;
+        val += texelFetch(HTex01, ivec2(0,2), 0).r;
+        val += texelFetch(HTex02, ivec2(0,2), 0).r;
+        val += texelFetch(HTex03, ivec2(0,2), 0).r;
+
+        val += texelFetch(HTex04, ivec2(0,2), 0).r;
+        val += texelFetch(HTex05, ivec2(0,2), 0).r;
+        val += texelFetch(HTex06, ivec2(0,2), 0).r;
+        val += texelFetch(HTex07, ivec2(0,2), 0).r;
+        // // this will kick out HText00 from L1
+        val += texelFetch(HTex08, ivec2(0,2), 0).r;
+
+        // // // finally, we access this again and it will be treated as a new read from DRAM
+        // for (int i = 0; i < 1; i++) {
+        //     val += texelFetch(HTex00, ivec2(0,0), 0).r;
+        // }
     }
 
     // single hammer
     // float val = hammerIt();
     // temp += val;
 
-    gl_Position = vec4(aPos, temp);
+    gl_Position = vec4(aPos, val);
 }
