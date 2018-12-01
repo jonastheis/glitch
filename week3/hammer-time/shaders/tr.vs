@@ -3,7 +3,7 @@ layout (location = 0) in vec3 aPos; // the position variable has attribute posit
 
 #define TEXTURE_SIZE 32
 #define TILE 4
-#define HAMMER 8000000
+#define HAMMER 16000000
 
 uniform sampler2D HTex00;
 uniform sampler2D HTex01;

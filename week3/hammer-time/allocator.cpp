@@ -194,7 +194,7 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES) {
 }
 
 int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
-  int NUM_BLANK_TEXTURES = 64;
+  int NUM_BLANK_TEXTURES = 192;
 
   int offset = get_first_index();
   
