@@ -97,7 +97,8 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES) {
   glGenTextures(NUM_BLANK_TEXTURES, textures);
   for (int i = 0; i < NUM_BLANK_TEXTURES; i++) {
     GLuint *tData = (GLuint*) malloc(PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
-    memset((void *)tData, textures[i]%(0x100), PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+    // memset((void *)tData, textures[i]%(0x100), PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
+    memset((void *)tData, 0x00, PAGE_TEXTURE_H * PAGE_TEXTURE_W * sizeof(GLuint));
     createTexture2DRGBA(textures[i], tData, PAGE_TEXTURE_W, PAGE_TEXTURE_H);
 
     // TODO: is this needed or not? 
@@ -189,12 +190,12 @@ int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES) {
   }
 
   // printf("%d %d %d .... %d %d %d\n", textures[0], textures[1], textures[2], textures[NUM_BLANK_TEXTURES-3], textures[NUM_BLANK_TEXTURES-2], textures[NUM_BLANK_TEXTURES-1]);
-  printf("[Allocator] + Target memory region found. \n");
+  // printf("[Allocator] + Target memory region found. \n");
   return return_index;
 }
 
 int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
-  int NUM_BLANK_TEXTURES = 192;
+  int NUM_BLANK_TEXTURES = 64;
 
   int offset = get_first_index();
   

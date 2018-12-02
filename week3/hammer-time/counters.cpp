@@ -99,8 +99,7 @@ void dump_counter_names(int verbose) {
   }
 }
 
-void init_perf_functions()
-{
+void init_perf_functions() {
   glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC)eglGetProcAddress("glGetPerfMonitorGroupsAMD");
   glGetPerfMonitorCountersAMD = (PFNGLGETPERFMONITORCOUNTERSAMDPROC)eglGetProcAddress("glGetPerfMonitorCountersAMD");
   glGetPerfMonitorGroupStringAMD = (PFNGLGETPERFMONITORGROUPSTRINGAMDPROC)eglGetProcAddress("glGetPerfMonitorGroupStringAMD");

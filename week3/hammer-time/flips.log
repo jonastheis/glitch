@@ -1,0 +1,5 @@
+
+++ node006
+  + [TextId: 509] BIT FLIP IDENTIFIED [ByteIndex: 2293]
+  + KGSLEntry[41+0=41] = {id: 538, texture_id: 509, useraddr: b5984000, pfn: 5d48d, alloc_order: 71}
+
