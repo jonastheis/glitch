@@ -186,48 +186,69 @@ void _prepare_hammer_time() {
   // |----|----|----|----|----|----|----|----|
   //  3233 3435 3637 3839 4041 4243 4445 4647
   // |xxxx|----|----|----|----|----|----|----|
+  //  4849 5051 5253 5455 5657 5859 6061 6263
+  // |----|----|----|----|----|----|----|----|
 
-  // fill textures in row n-1, n+1 with 0
-  for (int offset = 0; offset < 16; offset += 2) {
-    fill_texture(cont_entries[offset + 0].texture_id, 0x00);
-    fill_texture(cont_entries[offset + 1].texture_id, 0x00);
+  for (int row = 0; row <= 16; row += 16) {
+    printf("++ Prepare row [%d]\n", row/16);
 
-    fill_texture(cont_entries[offset + 32].texture_id, 0x00);
-    fill_texture(cont_entries[offset + 33].texture_id, 0x00);
+    // fill textures in row n-1, n+1 with 0
+    for (int localOffset = 0; localOffset < 16; localOffset += 2) {
+      int offset = row + localOffset;
+      printf("++ Hammering [%d][%d]\n", offset, offset+1);
 
-    // fill textures in row n with 1
-    fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
-    fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
+      fill_texture(cont_entries[offset + 0].texture_id, 0x00);
+      fill_texture(cont_entries[offset + 1].texture_id, 0x00);
 
-    // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
-    bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
-    bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
-    bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
-    bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
+      fill_texture(cont_entries[offset + 32].texture_id, 0x00);
+      fill_texture(cont_entries[offset + 33].texture_id, 0x00);
 
-    // select 5 textures for eviction
-    if (offset < 8)
-    {
-      // take 5 textures from end of first row: 11,12,13,14,15
-      for (int i = 0; i < 5; i++)
-      {
-        bind_texture(cont_entries[11 + i].texture_id, 4 + i, 'H', 11 + i);
+      // fill textures in row n with 1
+      fill_texture(cont_entries[offset + 16].texture_id, 0xFF);
+      fill_texture(cont_entries[offset + 17].texture_id, 0xFF);
+
+      // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
+      bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
+      bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
+      bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
+      bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
+
+      // select 5 textures for eviction
+      if (row >= 16) {
+        if (localOffset < 8) {
+          // take 5 textures from end of first row: 11,12,13,14,15
+          for (int i = 0; i < 5; i++) {
+            bind_texture(cont_entries[11 + i].texture_id, 4 + i, 'H', 11 + i);
+          }
+        } else {
+          // take 5 textures from beginning of first row: 0,1,2,3,4
+          for (int i = 0; i < 5; i++) {
+            bind_texture(cont_entries[i].texture_id, 4 + i, 'H', i);
+          }
+        }
+      } else {
+        if (localOffset < 8) {
+          // take 5 textures from end of last row: 59,60,61,62,63
+          for (int i = 0; i < 5; i++) {
+            bind_texture(cont_entries[59 + i].texture_id, 4 + i, 'H', 59 + i);
+          }
+        } else {
+          // take 5 textures from beginning of last row: 48,49,50,51,52
+          for (int i = 0; i < 5; i++) {
+            bind_texture(cont_entries[48 + i].texture_id, 4 + i, 'H', 48 + i);
+          }
+        }
       }
-    }
-    else
-    {
-      // take 5 textures from beginning of first row: 0,1,2,3,4
-      for (int i = 0; i < 5; i++)
-      {
-        bind_texture(cont_entries[i].texture_id, 4 + i, 'H', i);
-      }
-    }
-    // important: bind dummy texture last to prevent last texture error
-    bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
+      
+      // important: bind dummy texture last to prevent last texture error
+      bind_texture(cont_entries[15].texture_id, 9, 'D', 15);
 
-    // check hammered textures for bit flip
-    view_texture(cont_entries[offset + 16].texture_id);
-    view_texture(cont_entries[offset + 17].texture_id);
+      // check hammered textures for bit flip
+      // printf("+++ Checking [%d][%d]\n", offset + 16, offset + 17);
+      view_texture(cont_entries[offset + 16].texture_id);
+      view_texture(cont_entries[offset + 17].texture_id);
+    }
+
   }
 }
 
@@ -235,7 +256,7 @@ void prepare_hammer_time()
 {
   for (int i = 0; i < 400000; i++)
   {
-    allocate_cont(48, KB4, &cont_entries[0]);
+    allocate_cont(64, KB4, &cont_entries[0]);
     print_entries(cont_entries, 0, 4);
     _prepare_hammer_time();
     glDrawArrays(GL_POINTS, 0, 1);
