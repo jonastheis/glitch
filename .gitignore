@@ -1,3 +1,7 @@
+#Submission files and PDFs
+*.zip
+*.pdf
+
 .idea
 .DS_STORE
 
