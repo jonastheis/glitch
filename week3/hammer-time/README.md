@@ -49,7 +49,7 @@ access | texture | KB offset | type
 
 ## Example Bit-flips
 
-Our code works the best on `node004` and almost always find ~5 flips immediately. See below for an example found in `node005`:
+Our code works the best on `node004` and almost always find ~5 flips immediately. See below for an example found in `node004`:
 
 ```
 [Allocator] + Exhausting memory with 128 page-textures
@@ -72,7 +72,7 @@ Our code works the best on `node004` and almost always find ~5 flips immediately
   ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,  ff,ff,ff,ff,
 ```
 
-Live video of the above log is attached. 
+[Live video](/Glitch-Recording-1-720p) of the above log is attached. 
 
 For the rest, there are the KGSLEntries (a data structure we use to store the combined data of each KGSL and pagemap entry) of some random bit-flips that we have observed. Technically, the `useraddr` and the `pfn` can be used to obtain the physical address and later verified. Logs were recorded earlier so they have slightly simpler format.
 
