@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
+#include <math.h>
 
 #include "size.h"
 #include "mem_util.h"
@@ -20,13 +21,17 @@ Shader shader;
 unsigned int framebuffer;
 KGSLEntry cont_entries[64];
 
-//assumes little endian
-void printBits(size_t const size, void const *const ptr)
+inline double log2(const double x)
 {
+  return log(x) * M_LOG2E;
+}
+
+//assumes little endian
+void printBits(size_t const size, void const *const ptr) {
   unsigned char *b = (unsigned char *)ptr;
   unsigned char byte;
   int i, j;
-
+  printf("+++ Bit-value: ");
   for (i = size - 1; i >= 0; i--)
   {
     for (j = 7; j >= 0; j--)
@@ -65,7 +70,9 @@ void view_texture(unsigned int textureId, int kgsl_index) {
   {
     if (exportData[i] != 0xff)
     {
-      printf("+++ [TextId: %u] BIT FLIP IDENTIFIED [ByteIdx: %d][ByteValue: %x]!\n", textureId, i, exportData[i]);
+      printf("++++ BIT FLIP IDENTIFIED\n");
+      printf("+++ INFO: [Texture-Id: %u][Bit-Index: %d][Byte-Index: %d][ByteValue: %x][8-byte-offset: %d]\n",
+             cont_entries[kgsl_index].texture_id, (int)log2(exportData[i] ^ 0xff), i, exportData[i], i / 8);
       printBits(1, &exportData[i]);
       print_entries(cont_entries, kgsl_index, 1);
       // exit(0);
@@ -286,6 +293,8 @@ int main( int argc, char** argv ) {
   init_opengl_setup();
   init_framebuffer();
 
+
+  // ---------------------- Main Program: Run bitflip test ----------------------
   prepare_hammer_time();
 
 
@@ -310,7 +319,6 @@ int main( int argc, char** argv ) {
   // print_entries(cont_entries, 0, 4);
   // _prepare_hammer_time();
   // perform_measurement(group_UCHE, counter_UCHE, num_target_counters);
-
 
   return 0;
 }
