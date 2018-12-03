@@ -227,33 +227,33 @@ void _prepare_hammer_time() {
 
       // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
       bind_texture(cont_entries[offset + 0].texture_id, 0, 'H', offset + 0);
-      bind_texture(cont_entries[offset + 32].texture_id, 1, 'H', offset + 32);
-      bind_texture(cont_entries[offset + 1].texture_id, 2, 'H', offset + 1);
-      bind_texture(cont_entries[offset + 33].texture_id, 3, 'H', offset + 33);
+      bind_texture(cont_entries[offset + 32].texture_id, 2, 'H', offset + 32);
+      bind_texture(cont_entries[offset + 1].texture_id, 4, 'H', offset + 1);
+      bind_texture(cont_entries[offset + 33].texture_id, 6, 'H', offset + 33);
 
       // select 5 textures for eviction
       if (row >= 16) {
         if (localOffset < 8) {
           // take 5 textures from end of first row: 11,12,13,14,15
           for (int i = 0; i < 5; i++) {
-            bind_texture(cont_entries[11 + i].texture_id, 4 + i, 'H', 11 + i);
+            bind_texture(cont_entries[11 + i].texture_id, i == 4 ? 8 : i*2+1, 'H', 11 + i);
           }
         } else {
           // take 5 textures from beginning of first row: 0,1,2,3,4
           for (int i = 0; i < 5; i++) {
-            bind_texture(cont_entries[i].texture_id, 4 + i, 'H', i);
+            bind_texture(cont_entries[i].texture_id, i == 4 ? 8 : i*2+1, 'H', i);
           }
         }
       } else {
         if (localOffset < 8) {
           // take 5 textures from end of last row: 59,60,61,62,63
           for (int i = 0; i < 5; i++) {
-            bind_texture(cont_entries[59 + i].texture_id, 4 + i, 'H', 59 + i);
+            bind_texture(cont_entries[59 + i].texture_id, i == 4 ? 8 : i*2+1, 'H', 59 + i);
           }
         } else {
           // take 5 textures from beginning of last row: 48,49,50,51,52
           for (int i = 0; i < 5; i++) {
-            bind_texture(cont_entries[48 + i].texture_id, 4 + i, 'H', 48 + i);
+            bind_texture(cont_entries[48 + i].texture_id, i == 4 ? 8 : i*2+1, 'H', 48 + i);
           }
         }
       }
