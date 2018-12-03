@@ -91,7 +91,7 @@ int get_first_index() {
 
 int _allocate_cont(int num_pages, int page_size, int NUM_BLANK_TEXTURES) {
   int return_index = 0;
-  printf("[Allocator] + Exhusting memory with %d page-textures\n", NUM_BLANK_TEXTURES);
+  printf("[Allocator] + Exhausting memory with %d page-textures\n", NUM_BLANK_TEXTURES);
   // Generate a lot of textures, each 1 page
   GLuint textures[NUM_BLANK_TEXTURES];
   glGenTextures(NUM_BLANK_TEXTURES, textures);
