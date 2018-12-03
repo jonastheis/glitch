@@ -3,3 +3,21 @@
   + [TextId: 509] BIT FLIP IDENTIFIED [ByteIndex: 2293]
   + KGSLEntry[41+0=41] = {id: 538, texture_id: 509, useraddr: b5984000, pfn: 5d48d, alloc_order: 71}
 
+++ node004
+    +++ [TextId: 2585] BIT FLIP IDENTIFIED [ByteIdx: 2302][ByteValue: df]!
+    11011111
+    + KGSLEntry[16+0=16] = {id: 2614, texture_id: 2585, useraddr: b3ec0000, pfn: 61ad1, alloc_order: 303}
+    +++ [TextId: 2597] BIT FLIP IDENTIFIED [ByteIdx: 2583][ByteValue: fb]!
+    11111011
+    + KGSLEntry[28+0=28] = {id: 2626, texture_id: 2597, useraddr: b3e68000, pfn: 61add, alloc_order: 291}
+    +++ [TextId: 2615] BIT FLIP IDENTIFIED [ByteIdx: 341][ByteValue: bf]!
+    10111111
+    + KGSLEntry[46+0=46] = {id: 2644, texture_id: 2615, useraddr: b3e44000, pfn: 61aef, alloc_order: 273}
+
+++ node007:
+    +++ [TextId: 12071] BIT FLIP IDENTIFIED [ByteIdx: 2782][ByteValue: df]!
+    11011111
+    + KGSLEntry[44+0=44] = {id: 12095, texture_id: 12071, useraddr: ac3c4000, pfn: 659ec, alloc_order: 84}
+    +++ [TextId: 15191] BIT FLIP IDENTIFIED [ByteIdx: 2310][ByteValue: f7]!
+    11110111
+    + KGSLEntry[33+0=33] = {id: 15220, texture_id: 15191, useraddr: a9e5a000, pfn: 5b321, alloc_order: 95}

@@ -202,7 +202,7 @@ int allocate_cont(int num_pages, int page_size, KGSLEntry *ret_entries) {
   int idx = _allocate_cont(num_pages, page_size, NUM_BLANK_TEXTURES);
   while(!idx) {
     printf("--- Failed [%d created]\n", allocated_before);
-    NUM_BLANK_TEXTURES *= 2;
+    NUM_BLANK_TEXTURES += NUM_BLANK_TEXTURES;
     idx = _allocate_cont(num_pages, page_size, NUM_BLANK_TEXTURES);
   }
   
