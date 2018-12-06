@@ -46,17 +46,19 @@ void main(){
   // FragColor = vec4(.5,.5,.5,.5);
 
   FragColor = vec4(
-    texelFetch(HTex00, ivec2(0,0), 0).r,
-    texelFetch(HTex01, ivec2(0,0), 0).r,
-    texelFetch(HTex02, ivec2(0,0), 0).r,
-    texelFetch(HTex03, ivec2(0,0), 0).r
+    texelFetch(HTex04, ivec2(0,0), 0).r,
+    texelFetch(HTex05, ivec2(0,0), 0).r,
+    texelFetch(HTex06, ivec2(0,0), 0).r,
+    texelFetch(HTex08, ivec2(0,0), 0).r
   );
 }
     </script>
+  <script src="static/jquery-3.3.1.min.js"></script>
   <script src="static/wglSetup.js"></script>
+  <script src="static/adbApi.js"></script>
   <script src="static/wglUtil.js"></script>
   <script src="static/wglShader.js"></script>
-  <script src="static/adbApi.js"></script>
+  <script src="static/allocator.js"></script>
   <script src="static/glitch.js"></script>
 </body>
 </html>

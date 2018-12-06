@@ -4,7 +4,7 @@ const FIRST_ELEM = 0x50515150
 
 
 
-async function get_tex_data() {
+async function get_tex_data() {    
     var result = await $.ajax({
         url: "get_tex_infos",
     })

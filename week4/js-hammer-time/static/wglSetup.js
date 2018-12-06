@@ -1,3 +1,9 @@
+// Global vars 
+KB = 1024;
+KB4 = KB * 4;
+PAGE_TEXTURE_W = 32;
+PAGE_TEXTURE_H = 32;
+
 function initGL() {
   const canvas = document.getElementById('c');
   gl = canvas.getContext('webgl2');

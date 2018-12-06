@@ -14,7 +14,17 @@ function createTexture2DRGBA(data, width, height) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
+  gl.bindTexture(gl.TEXTURE_2D, null);
   return texture;
+}
+
+function createUint8Array(elements, fill = 0x00) {
+  const arr = new Uint8Array(elements);
+
+  for (let i = 0; i < elements; i++) {
+    arr[i] = fill;
+  }
+  return arr;
 }
 
 function viewFramebuffer() {

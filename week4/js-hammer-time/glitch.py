@@ -129,6 +129,8 @@ def start():
 def get_tex_infos():
 	global textures
 	textures = get_kgsl_infos()
+	# for t in textures:
+	# 	print(t)
 	read_pagemap()
 	[tex.get_pfn() for tex in textures]
 	# pp.pprint(textures)
