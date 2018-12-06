@@ -26,16 +26,31 @@ void main() {
     </script>
     <script id="fragment-shader" type="x-shader/x-fragment">#version 300 es
 
-// fragment shaders don't have a default precision so we need
-// to pick one. mediump is a good default. It means "medium precision"
 precision mediump float;
-  
-// we need to declare an output for the fragment shader
-out vec4 outColor;
-  
-void main() {
-  // Just set the output to a constant redish-purple
-  outColor = vec4(0.5, 0, 0.5, 1);
+
+out vec4 FragColor;
+
+uniform sampler2D HTex00;
+uniform sampler2D HTex01;
+uniform sampler2D HTex02;
+uniform sampler2D HTex03;
+uniform sampler2D HTex04;
+uniform sampler2D HTex05;
+uniform sampler2D HTex06;
+uniform sampler2D HTex07;
+uniform sampler2D HTex08;
+// bind dummy texture last to prevent last texture error - do not use
+uniform sampler2D DTex09;
+
+void main(){
+  // FragColor = vec4(.5,.5,.5,.5);
+
+  FragColor = vec4(
+    texelFetch(HTex00, ivec2(0,0), 0).r,
+    texelFetch(HTex01, ivec2(0,0), 0).r,
+    texelFetch(HTex02, ivec2(0,0), 0).r,
+    texelFetch(HTex03, ivec2(0,0), 0).r
+  );
 }
     </script>
   <script src="wglSetup.js"></script>

@@ -39,4 +39,15 @@ class Shader {
   use() {
     gl.useProgram(this.id);
   }
+
+  bindTexture(texture, number, type, offset) {
+    const name = `${type}Tex0${number}`;
+    console.log(`++ Binding [${name}] -- offset: ${offset}`);
+
+    const location = gl.getUniformLocation(this.id, name);
+    console.log(gl.TEXTURE0 + number, gl.TEXTURE0, gl.TEXTURE1);
+    gl.activeTexture(gl.TEXTURE0 + number);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(location, number);
+  }
 }
