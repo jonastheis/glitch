@@ -1,3 +1,25 @@
+// Global vars
+KB = 1024;
+KB4 = KB * 4;
+PAGE_TEXTURE_W = 32;
+PAGE_TEXTURE_H = 32;
+ARRAY_UINT8_0 = createUint8Array(KB4, 0x00);
+ARRAY_UINT8_1 = createUint8Array(KB4, 0xFF);
+ARRAY_UINT8_READ_TEXTURE = createUint8Array(KB4);
+
+
+function initGL() {
+  const canvas = document.getElementById('c');
+  gl = canvas.getContext('webgl2');
+  if (!gl) {
+    console.log('-- No webgl2 for you!');
+    throw new Error('-- WebGL2 not available!');
+  }
+  else {
+    console.log('++ global gl object initialized');
+  }
+}
+
 function initFramebuffer() {
   framebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -58,4 +80,48 @@ function createRectangle() {
 
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
+}
+
+function checkForFlip(texture) {
+  // attach the texture as the first color attachment
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
+      throw new Error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
+  }
+
+  var pixels = ARRAY_UINT8_READ_TEXTURE;
+  gl.readPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+  for (let i = 0; i < KB4; i++) {
+    if(pixels[i] != 0xFF) {
+      console.log(`++++ BIT FLIP IDENTIFIED`);
+      console.log(`Value: ${pixels[i]}, byte offset: ${i}`);
+      return;
+    }
+  }
+}
+
+function fillTexture(texture, fill=0x00) {
+  let data;
+  if (fill == 0x00) {
+    data = ARRAY_UINT8_0;
+  } else if(fill == 0xFF) {
+    data = ARRAY_UINT8_1;
+  } else {
+    data = createUint8Array(KB4, fill);
+  }
+
+  // write special values to texture
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, gl.RGBA, gl.UNSIGNED_BYTE, data);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function createUint8Array(elements, fill=0x00) {
+  const arr = new Uint8Array(elements);
+
+  for(let i=0; i<elements; i++) {
+      arr[i] = fill;
+  }
+  return arr;
 }

