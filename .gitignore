@@ -15,6 +15,7 @@ cmake_install.cmake
 obj/
 libs/
 venv/
+__pycache__/
 
 # Clion
 cmake-build-*
