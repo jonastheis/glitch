@@ -45,8 +45,7 @@ class Shader {
     console.log(`++ Binding [${name}] -- offset: ${offset}`);
 
     const location = gl.getUniformLocation(this.id, name);
-    console.log(gl.TEXTURE0, gl.TEXTURE0 + number);
-    gl.activeTexture(gl.TEXTURE0 + number+1);
+    gl.activeTexture(gl.TEXTURE0 + number);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(location, number);
   }
