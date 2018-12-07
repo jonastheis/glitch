@@ -1,8 +1,10 @@
 // Global vars
 KB = 1024;
+MB = KB * KB
 KB4 = KB * 4;
 PAGE_TEXTURE_W = 32;
 PAGE_TEXTURE_H = 32;
+MIN_CONTIMUOUS_PAGES = 64
 ARRAY_UINT8_0 = createUint8Array(KB4, 0x00);
 ARRAY_UINT8_1 = createUint8Array(KB4, 0xFF);
 ARRAY_UINT8_READ_TEXTURE = createUint8Array(KB4);
@@ -134,4 +136,8 @@ function createUint8Array(elements, fill=0x00) {
       arr[i] = fill;
   }
   return arr;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

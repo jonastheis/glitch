@@ -3,7 +3,7 @@ WEB_PORT=5000
 DEBUG_PORT=13370
 
 adb reboot
-sleep 20
+sleep 40
 
 adb reverse tcp:$WEB_PORT tcp:$WEB_PORT
 adb forward tcp:$DEBUG_PORT localabstract:org.mozilla.firefox/firefox-debugger-socket

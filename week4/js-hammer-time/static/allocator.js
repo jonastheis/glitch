@@ -1,3 +1,4 @@
+
 class Allocator {
   constructor(pages) {
     this.pages = pages;
@@ -6,7 +7,8 @@ class Allocator {
     this.initKGSLIds = []
     this.newKGSL = []
 
-    this.textures = [] 
+    this.textures = []
+    this.maxIdSearched = 0
   }
 
   async _init(safe) {
@@ -14,21 +16,73 @@ class Allocator {
     this.initKGSL = await this.getKGSL()
     this.initKGSLIds = this.initKGSL.map(obj => obj.tex_id)
 
-    console.log(`[Allocator] ++ ${this.initKGSLIds.length} textures already existed. generating ${this.pages} page-textures.`);
+    console.log(`[Allocator] ++ ${this.initKGSLIds.length} textures already existed. generating ${this.pages} page-textures. [${this.pages*KB4/MB} MB]`);
     
     safe ? await this.allocateSafe() : await this.allocate()
+    console.debug('[Allocator] ++ Allocation Done.')
     
+    await sleep(200)
+    
+    console.debug('[Allocator] ++ Fetching new KGSL List.')
     // filter out thos that already existed from before.
     this.newKGSL = await this.getKGSL()
     this.newKGSL = this.newKGSL.filter(obj => this.initKGSLIds.indexOf(obj.tex_id) == -1)
     
     
     console.log(`[Allocator] ++ ${this.newKGSL.length} unique new textures found.`);
-    for (let i = 0; i < this.textures.length; i++) {
-      console.log(this.newKGSL[i])
+    if (this.newKGSL.length !== this.pages) {
+      this.clean()
+      throw `wrong texture filters ${this.pages} != ${this.newKGSL.length}`
+    }
+
+    // add the original index of all textures 
+    for (let i = 0; i < this.pages; i++) {
+      this.newKGSL[i].original_idx = i
     }
     
+    this.sortSelf()
+    
     return Promise.resolve(true)
+  }
+
+  SearchContPages() {
+    console.log(`[Allocator] ++ Searching for ${MIN_CONTIMUOUS_PAGES} pages.`);
+    let contPageChunks = []
+    for (let i = 0; i < this.pages - MIN_CONTIMUOUS_PAGES; i++) {
+      let found = 1
+      let j;
+      for (j = 0; j < MIN_CONTIMUOUS_PAGES; j++) {
+        if (this.newKGSL[i].pfn+j !== this.newKGSL[i+j].pfn ) {
+          found = 0
+          break 
+        }
+      }
+      this.newKGSL[i].alloc_order = j
+      if (found) {
+        let tmp = []
+        for (let k = 0; k < j; k++) {
+          tmp.push(this.newKGSL[i+k])
+        }
+        console.debug(`[Allocator] ++ found a page at index ${i}`)
+        contPageChunks.push(tmp) 
+        i += MIN_CONTIMUOUS_PAGES-1
+      }
+    }
+    return contPageChunks
+  }
+
+  sortSelf() {
+    this.newKGSL = this.newKGSL.sort((a, b) => {
+      if (a.tex_id < b.tex_id) {
+        return -1
+      }
+      else if (a.tex_id > b.tex_id) {
+        return 1
+      }
+      else {
+        return 0
+      }
+    })
   }
   
   async allocateSafe() {
@@ -64,7 +118,7 @@ class Allocator {
   }
 
   clean() {
-    for (let i = 0; i < this.textures[i]; i++) {
+    for (let i = 0; i < this.textures[i].length; i++) {
       gl.deleteTexture(this.textures[i]);
     }
   }
