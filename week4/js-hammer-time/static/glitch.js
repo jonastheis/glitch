@@ -5,32 +5,27 @@
 async function glitch() {
     // create gl context
     initGL();
-
-    const allocationPages = 256 * 128
-    // const allocationPages = 8
-    /*let allocator = new Allocator(allocationPages)
-    await allocator._init(0)
-    
-    await sleep(1000)
-    contPages = allocator.SearchContPages()
-    console.log(`++ ${contPages.length} continuous pages found`)
-
-    allocator.clean()
-    return*/
-
     initFramebuffer();
+    
+    allocatePages(PAGES_PER_MB * 64);
+    const allocator = new Allocator(PAGES_PER_MB * 128);
+    await allocator._init(0);
+
+    const contPages = allocator.SearchContPages();
+    console.log(`++ ${contPages.length} continuous pages found`);
     
     // enable shaders too be used
     shader = new Shader('vertex-shader', 'fragment-shader');
     shader.use();
 
+    // TODO: call with every chunk of contiguous memory
+    hammerTime();
+
+
     // debug with framebuffer (view texture contents)
     // initDebug();
     // gl.drawArrays(gl.TRIANGLES, 0, 6);
     // viewFramebuffer();
-
-    // TODO: call with every chunk of contiguous memory
-    hammerTime();
 }
 
 function hammerTime(contMem) {
