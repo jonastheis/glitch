@@ -36,7 +36,7 @@ void main() {
   uint val = 0u;
   ivec2 base = ivec2(0,0);
   ivec2 base32 = ivec2(0,2);
-  for (uint i = 0u; i < 1300000u; i++) {
+  for (uint i = 0u; i < 500000u; i++) {
       val += texelFetch(HTex00, base, 0).r;
       val += texelFetch(HTex01, base, 0).r;
       val += texelFetch(HTex02, base, 0).r;
@@ -70,18 +70,19 @@ void main() {
     <script id="fragment-shader" type="x-shader/x-fragment">#version 300 es
 
 precision mediump float;
+precision highp usampler2D;
 
 out vec4 FragColor;
 
-uniform sampler2D HTex00;
-uniform sampler2D HTex01;
-uniform sampler2D HTex02;
-uniform sampler2D HTex03;
-uniform sampler2D HTex04;
-uniform sampler2D HTex05;
-uniform sampler2D HTex06;
-uniform sampler2D HTex07;
-uniform sampler2D HTex08;
+uniform usampler2D HTex00;
+uniform usampler2D HTex01;
+uniform usampler2D HTex02;
+uniform usampler2D HTex03;
+uniform usampler2D HTex04;
+uniform usampler2D HTex05;
+uniform usampler2D HTex06;
+uniform usampler2D HTex07;
+uniform usampler2D HTex08;
 
 void main(){
   FragColor = vec4(.5,.5,.5,.5);

