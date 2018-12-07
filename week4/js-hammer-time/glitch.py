@@ -114,11 +114,11 @@ def start():
 	PID = int(subprocess.check_output(cmd.split()).split()[0])
 	print("Firefox PID: " + str(PID)) 
 
-	session = frida.get_usb_device().attach(PID)
-	with open(FRIDA_FILE, "r") as f:
-		script = session.create_script(f.read())	
-	script.load();
-	frida_api = script.exports
+	# session = frida.get_usb_device().attach(PID)
+	# with open(FRIDA_FILE, "r") as f:
+	# 	script = session.create_script(f.read())	
+	# script.load();
+	# frida_api = script.exports
 
 	with open(HTML_FILE, "r") as f:
 		text = f.read()

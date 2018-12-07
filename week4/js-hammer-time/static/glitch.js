@@ -10,8 +10,7 @@ async function glitch() {
     // const allocationPages = 8
     let allocator = new Allocator(allocationPages)
     await allocator._init(0)
-    
-    await sleep(1000)
+
     contPages = allocator.SearchContPages()
     console.log(`++ ${contPages.length} continuous pages found`)
 

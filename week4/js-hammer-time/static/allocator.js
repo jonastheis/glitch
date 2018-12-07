@@ -21,8 +21,6 @@ class Allocator {
     safe ? await this.allocateSafe() : await this.allocate()
     console.debug('[Allocator] ++ Allocation Done.')
     
-    await sleep(200)
-    
     console.debug('[Allocator] ++ Fetching new KGSL List.')
     // filter out thos that already existed from before.
     this.newKGSL = await this.getKGSL()
@@ -32,16 +30,19 @@ class Allocator {
     console.log(`[Allocator] ++ ${this.newKGSL.length} unique new textures found.`);
     if (this.newKGSL.length !== this.pages) {
       this.clean()
-      throw `wrong texture filters ${this.pages} != ${this.newKGSL.length}`
+      console.warn(`[Allocator] wrong texture filters Expected [${this.pages}] != [Got ${this.newKGSL.length}]`)
+      console.warn(`[Allocator] Asusming that ${this.newKGSL.length} pages are created.`)
+      this.pages = this.newKGSL.length
     }
 
-    // add the original index of all textures 
-    for (let i = 0; i < this.pages; i++) {
-      this.newKGSL[i].original_idx = i
-    }
-    
+    // modifies this.newKGSL
     this.sortSelf()
     
+    // add the original index of all textures 
+    for (let i = 0; i < this.pages; i++) {
+      this.newKGSL[i].texture = this.textures[i]
+    }
+
     return Promise.resolve(true)
   }
 
