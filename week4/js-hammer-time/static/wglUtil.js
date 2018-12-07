@@ -8,7 +8,8 @@ MIN_CONTIMUOUS_PAGES = 64
 ARRAY_UINT8_0 = createUint8Array(KB4, 0x00);
 ARRAY_UINT8_1 = createUint8Array(KB4, 0xFF);
 ARRAY_UINT8_READ_TEXTURE = createUint8Array(KB4);
-
+PAGES_PER_MB = 256
+SPAM_PAGES = []
 
 function initGL() {
   const canvas = document.getElementById('c');
@@ -129,13 +130,25 @@ function fillTexture(texture, fill=0x00) {
   gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
-function createUint8Array(elements, fill=0x00) {
-  const arr = new Uint8Array(elements);
+function createUint32Array(elements, fill=0x00000000) {
+  const arr = new Uint32Array(elements);
 
   for(let i=0; i<elements; i++) {
       arr[i] = fill;
   }
   return arr;
+}
+
+function allocatePage() {
+  let page = createUint32Array(KB4, 1)
+  window.SPAM_PAGES.push(page)
+}
+
+function allocatePages(pages) {
+  console.log(`++ Bulk allocating ${pages} pages | ${pages*KB4 / MB} MB of memory `)
+  for (let i = 0; i < pages; i++) {
+    allocatePage()
+  }
 }
 
 function sleep(ms) {

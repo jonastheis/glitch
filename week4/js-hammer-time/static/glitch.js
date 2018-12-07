@@ -5,10 +5,10 @@
 async function glitch() {
     // create gl context
     initGL();
+    
+    allocatePages(PAGES_PER_MB * 64)
+    let allocator = new Allocator(PAGES_PER_MB * 128)
 
-    const allocationPages = 256 * 128
-    // const allocationPages = 8
-    let allocator = new Allocator(allocationPages)
     await allocator._init(0)
 
     contPages = allocator.SearchContPages()
