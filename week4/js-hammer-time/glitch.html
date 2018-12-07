@@ -11,17 +11,60 @@
     <canvas width="200" height="200" id="c">Not supported</canvas>
 
     <script id="vertex-shader" type="x-shader/x-vertex">#version 300 es
- 
-// an attribute is an input (in) to a vertex shader.
-// It will receive data from a buffer
-in vec4 a_position;
- 
-// all shaders have a main function
-void main() {
- 
-  // gl_Position is a special variable a vertex shader
-  // is responsible for setting
-  gl_Position = a_position;
+// TODO: maybe necessary to use float for textures (sampler2D)
+precision highp usampler2D;
+layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
+
+#define TEXTURE_SIZE 32
+#define TILE 4
+
+uniform usampler2D HTex00;
+uniform usampler2D HTex01;
+uniform usampler2D HTex02;
+uniform usampler2D HTex03;
+uniform usampler2D HTex04;
+uniform usampler2D HTex05;
+uniform usampler2D HTex06;
+uniform usampler2D HTex07;
+uniform usampler2D HTex08;
+
+void main() {   
+  
+  // -------------------- POC for the efficient cache eviction     
+
+  // final hammer loop 
+  uint val = 0u;
+  ivec2 base = ivec2(0,0);
+  ivec2 base32 = ivec2(0,2);
+  for (uint i = 0u; i < 1300000u; i++) {
+      val += texelFetch(HTex00, base, 0).r;
+      val += texelFetch(HTex01, base, 0).r;
+      val += texelFetch(HTex02, base, 0).r;
+      val += texelFetch(HTex03, base, 0).r;
+
+      val += texelFetch(HTex04, base, 0).r;
+      val += texelFetch(HTex05, base, 0).r;
+      val += texelFetch(HTex06, base, 0).r;
+      val += texelFetch(HTex07, base, 0).r;
+      // // this will kick out HText00 from UCHE
+      val += texelFetch(HTex08, base, 0).r;
+      
+      // These 7 will fill the rest of the L1 set.
+      // NOTE: evicting L1 is already a new access to DRAM. 
+      val += texelFetch(HTex00, base32, 0).r;
+      val += texelFetch(HTex01, base32, 0).r;
+      val += texelFetch(HTex02, base32, 0).r;
+      val += texelFetch(HTex03, base32, 0).r;
+
+      val += texelFetch(HTex04, base32, 0).r;
+      val += texelFetch(HTex05, base32, 0).r;
+      val += texelFetch(HTex06, base32, 0).r;
+      val += texelFetch(HTex07, base32, 0).r;
+      // // this will kick out HText00 from L1
+      val += texelFetch(HTex08, base32, 0).r;
+  } 
+
+  gl_Position = vec4(aPos, val);
 }
     </script>
     <script id="fragment-shader" type="x-shader/x-fragment">#version 300 es
@@ -41,14 +84,14 @@ uniform sampler2D HTex07;
 uniform sampler2D HTex08;
 
 void main(){
-  // FragColor = vec4(.5,.5,.5,.5);
+  FragColor = vec4(.5,.5,.5,.5);
 
-  FragColor = vec4(
+  /*FragColor = vec4(
     texelFetch(HTex04, ivec2(0,0), 0).r,
     texelFetch(HTex05, ivec2(0,0), 0).r,
     texelFetch(HTex06, ivec2(0,0), 0).r,
     texelFetch(HTex08, ivec2(0,0), 0).r
-  );
+  );*/
 }
     </script>
   <script src="static/jquery-3.3.1.min.js"></script>
