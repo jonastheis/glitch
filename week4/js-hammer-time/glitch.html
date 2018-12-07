@@ -36,7 +36,7 @@ void main() {
   uint val = 0u;
   ivec2 base = ivec2(0,0);
   ivec2 base32 = ivec2(0,2);
-  for (uint i = 0u; i < 500000u; i++) {
+  for (uint i = 0u; i < 1300000u; i++) {
       val += texelFetch(HTex00, base, 0).r;
       val += texelFetch(HTex01, base, 0).r;
       val += texelFetch(HTex02, base, 0).r;

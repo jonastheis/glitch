@@ -18,9 +18,9 @@ async function glitch() {
     shader = new Shader('vertex-shader', 'fragment-shader');
     shader.use();
 
-    // TODO: call with every chunk of contiguous memory
-    hammerTime(contPages[0]);
-
+    for (let cont of contPages) {
+        hammerTime(cont);
+    }
 
     // debug with framebuffer (view texture contents)
     // initDebug();
@@ -97,6 +97,7 @@ function hammerTime(contMem) {
             // hammer textures
             console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
             gl.drawArrays(gl.POINTS, 0, 1);
+            console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
 
             // check hammered textures for bit flip
             checkForFlip(contMem[offset + 16].texture, offset+16);
