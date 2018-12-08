@@ -8,7 +8,7 @@ sleep 40
 adb reverse tcp:$WEB_PORT tcp:$WEB_PORT
 adb forward tcp:$DEBUG_PORT localabstract:org.mozilla.firefox/firefox-debugger-socket
 # adb exec-out su -c /data/local/tmp/frida-server12 &
-adb exec-out su -c "/data/local/tmp/frida-server12 &"
+# adb exec-out su -c "/data/local/tmp/frida-server12 &"
 
 adb shell input keyevent KEYCODE_POWER #turn on screen
 adb shell input touchscreen swipe 930 880 930 380 #swipe up to unlock
