@@ -112,7 +112,7 @@ class Allocator {
 
   async allocate() {
     for (let i = 0; i < this.pages; i++) {
-      const t = createTexture2DRGBA(createUint8Array(KB4, i), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
+      const t = createTexture2DRGBA(createUint8Array(KB4, 0), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
       this.textures.push(t);
       if (i % this.SLEEP == 0) {
         console.debug(`[${i}/${this.pages}] pages created so far. Taking a short break.`);

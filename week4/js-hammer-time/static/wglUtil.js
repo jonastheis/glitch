@@ -12,7 +12,6 @@ PAGES_PER_MB = 256
 SPAM_PAGES = []
 
 function initGL() {
-  // const canvas = document.getElementById('c');
   const canvas = document.createElement("canvas");
   gl = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
   if (!gl) {
@@ -160,7 +159,7 @@ function mockContPages(count) {
   for (let i = 0; i < count; i++) {
     let block = [];
     for (let j = 0; j < 64; j++) {
-      block.push({ texture: createTexture2DRGBA(createUint8Array(KB4, j), PAGE_TEXTURE_W, PAGE_TEXTURE_H) });
+      block.push({ texture: createTexture2DRGBA(createUint8Array(KB4, 0x00), PAGE_TEXTURE_W, PAGE_TEXTURE_H) });
     }
     blocks.push(block);
   }

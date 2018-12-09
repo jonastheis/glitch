@@ -66,6 +66,7 @@ async function hammerTime(contMem) {
         }
     }
 
+    // WebGL2 has some strange asynchronous behaviour
     await sleep(500);
 
     // hammer row 0 and row 1
