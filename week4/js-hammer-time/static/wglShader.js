@@ -49,4 +49,8 @@ class Shader {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(location, number);
   }
+
+  setInt(name, value) {
+    gl.uniform1i(gl.getUniformLocation(this.id, name), value);
+  }
 }

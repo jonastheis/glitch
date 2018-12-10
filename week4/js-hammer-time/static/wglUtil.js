@@ -15,8 +15,8 @@ INT_MARKER = 0x40414140
 FIRST_ELEM = 0x50515150
 
 function initGL() {
-  const canvas = document.createElement('canvas');
-  gl = canvas.getContext('webgl2');
+  const canvas = document.createElement("canvas");
+  gl = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
   if (!gl) {
     console.log('-- No webgl2 for you!');
     throw new Error('-- WebGL2 not available!');
@@ -24,6 +24,8 @@ function initGL() {
   else {
     console.log('++ global gl object initialized');
   }
+
+  // gl.viewport(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H);
 }
 
 function initFramebuffer() {
@@ -60,7 +62,7 @@ function viewFramebuffer() {
   gl.readPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   
   for (let i = 0; i <= KB4 - 4; i += 4) {
-    console.log(`${pixels[i]},${pixels[i + 1]},${pixels[i + 2]},${pixels[i + 3]}  `);
+      console.log(`${pixels[i]},${pixels[i + 1]},${pixels[i + 2]},${pixels[i + 3]}  `);
   }
 }
 
@@ -100,7 +102,6 @@ function createRectangle() {
 
 function checkForFlip(texture) {
   // attach the texture as the first color attachment
-  console.log(`++ Checking for bitflips.`)
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
   if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
     throw new Error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
@@ -178,7 +179,7 @@ function mockContPages(count) {
   for (let i = 0; i < count; i++) {
     let block = [];
     for (let j = 0; j < 64; j++) {
-      block.push({ texture: createTexture2DRGBA(createUint8Array(KB4, j), PAGE_TEXTURE_W, PAGE_TEXTURE_H) });
+      block.push({ texture: createTexture2DRGBA(createUint8Array(KB4, 0x00), PAGE_TEXTURE_W, PAGE_TEXTURE_H) });
     }
     blocks.push(block);
   }
