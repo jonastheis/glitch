@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
 
-  <title>GLitch</title>
+  <title>GLitch Exploit</title>
 </head>
 
 <body onload="glitch();">
     <h1>This is the glitch attack page</h1>
-    <canvas width="200" height="200" id="c">Not supported</canvas>
 
     <script id="vertex-shader" type="x-shader/x-vertex">#version 300 es
 // TODO: maybe necessary to use float for textures (sampler2D)
@@ -96,11 +95,12 @@ void main(){
 }
     </script>
   <script src="static/jquery-3.3.1.min.js"></script>
-  <!-- <script src="static/wglSetup.js"></script> -->
   <!-- <script src="static/adbApi.js"></script> -->
   <script src="static/wglUtil.js"></script>
   <script src="static/wglShader.js"></script>
   <script src="static/allocator.js"></script>
+  
+  <script src="static/exploit.js"></script>
   <script src="static/glitch.js"></script>
 </body>
 </html>

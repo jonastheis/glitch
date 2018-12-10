@@ -1,6 +1,6 @@
 
 WEB_PORT=5000
-DEBUG_PORT=13370
+DEBUG_PORT=13388
 
 adb reboot
 sleep 40

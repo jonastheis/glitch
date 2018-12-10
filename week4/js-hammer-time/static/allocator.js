@@ -30,10 +30,9 @@ class Allocator {
     
     console.log(`[Allocator] ++ ${this.newKGSL.length} unique new textures found.`);
     if (this.newKGSL.length !== this.pages) {
-      this.clean()
       console.warn(`[Allocator] wrong texture filters Expected [${this.pages}] != [Got ${this.newKGSL.length}]`)
-      console.warn(`[Allocator] Asusming that ${this.newKGSL.length} pages are created.`)
-      this.pages = this.newKGSL.length
+      console.warn(`[Allocator] Asusming that ${Math.min(this.newKGSL.length, this.pages)} pages are created.`)
+      this.pages = Math.min(this.newKGSL.length, this.pages)
     }
 
     // modifies this.newKGSL
@@ -114,9 +113,9 @@ class Allocator {
     for (let i = 0; i < this.pages; i++) {
       const t = createTexture2DRGBA(createUint8Array(KB4, i), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
       this.textures.push(t);
-      if (i % this.SLEEP == 0) {
-        console.debug(`[${i}/${this.pages}] pages created so far. Taking a short break.`);
-        await sleep(500);
+      if (i % this.SLEEP == 0 && i > 0) {
+        console.debug(`[Allocator] [${i}/${this.pages}] pages created so far. Taking a short break.`);
+        await sleep(1000);
         allocatePages(8 * PAGES_PER_MB)
       }
     }
