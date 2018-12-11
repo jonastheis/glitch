@@ -8,11 +8,6 @@ const MARKER_VAL = "50515150??FFFFFF40414140??FFFFFF"
 
 ----------------------------------------------------------*/
 
-
-
-
-
-
 function find_pages(val) {
 	if (val==null) {
  		val = "50515150??FFFFFF40414140??FFFFFF";
@@ -28,8 +23,8 @@ function find_pages(val) {
 					results.push(arr)
 					console.log(JSON.stringify(arr))		
 				}
-			
 		} catch (e) {
+			console.log(e)
 		}
 	}
 	// console.log("Location at:", JSON.stringify(location));
@@ -44,16 +39,12 @@ function find_pages(val) {
 
 }
 
-
-
-
 function fill_buff(src, dst, len) {
 	for (var i = 0; i < len; i++) {
 		dst[i] = src[i];
 	}
 	return dst
 }
-
 
 function flip_bit(v_addr, bit_to_flip) {
 
@@ -67,11 +58,20 @@ function flip_bit(v_addr, bit_to_flip) {
 	console.log("prev_val: " + prev_val + " new_val: " + Memory.readPointer(ptr(v_addr)));
 }
 
+function read_pointer(v_addr) {
+	return Memory.readPointer(ptr(v_addr));
+}
+
+function read_bytearray(v_addr) {
+	return Memory.readByteArray(ptr(v_addr), 4096)
+}
 
 
 rpc.exports = {
   findPages: find_pages,
-  flipBit: flip_bit
+	flipBit: flip_bit,
+	readPointer: read_pointer,
+	readBytearray: read_bytearray
 };
 
 

@@ -1,6 +1,12 @@
 #Submission files and PDFs
 *.zip
 *.pdf
+glitch_server/
+
+das-node-ssh.sh
+das-ssh.sh
+ff-it.sh
+sftp.json
 
 .idea
 .DS_STORE
@@ -26,3 +32,6 @@ cmake-build-*
 *.a
 *.out
 *.cbp
+week4/js-hammer-time/das-node-ssh.sh
+week4/js-hammer-time/das-ssh.sh
+week4/js-hammer-time/ff-it.sh

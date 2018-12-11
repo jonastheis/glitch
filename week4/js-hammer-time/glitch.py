@@ -14,7 +14,7 @@ FRIDA_FILE = "flipper.js"
 KGSL_FILE = "kgsl.txt"
 PAGEMAP_ENTRY_SIZE = 8 # 64 bits
 PAGE_SHIFT = 12 # 1<<12 == 4096
-FLIP_CHANCE = 55 # probability of triggering bit flips [1,100]
+FLIP_CHANCE = 90 # probability of triggering bit flips [1,100]
 
 
 # ------------------------------------------
@@ -114,11 +114,11 @@ def start():
 	PID = int(subprocess.check_output(cmd.split()).split()[0])
 	print("Firefox PID: " + str(PID)) 
 
-	# session = frida.get_usb_device().attach(PID)
-	# with open(FRIDA_FILE, "r") as f:
-	# 	script = session.create_script(f.read())	
-	# script.load();
-	# frida_api = script.exports
+	session = frida.get_usb_device().attach(PID)
+	with open(FRIDA_FILE, "r") as f:
+		script = session.create_script(f.read())	
+	script.load();
+	frida_api = script.exports
 
 	with open(HTML_FILE, "r") as f:
 		text = f.read()
@@ -129,15 +129,27 @@ def start():
 def get_tex_infos():
 	global textures
 	textures = get_kgsl_infos()
-	# for t in textures:
-	# 	print(t)
 	read_pagemap()
 	[tex.get_pfn() for tex in textures]
 	# pp.pprint(textures)
-	print("Done.")
 	return json.dumps([tex.__dict__ for tex in textures])
 
-	
+
+
+@app.route('/read_ptr')
+def read_ptr():
+	val = frida_api.read_pointer(request.args.get('vaddr'))
+	if len(val) == 9: val = "0x0" + val[2:]
+	return json.dumps({'ptr': val, 'val': int(val[2:4], 16)})
+
+@app.route('/read_texture')
+def read_texture():
+	# tex_val = []
+	# for i in range(1024):
+	# 	val = frida_api.read_pointer(request.args.get('vaddr'))	
+	# 	tex_val.append(val)
+	tex_val = frida_api.read_bytearray(request.args.get('vaddr'))
+	return json.dumps({'tex': list(bytearray(tex_val)) })
 
 
 @app.route('/hammer_tex')
@@ -150,6 +162,7 @@ def hammer_tex():
 	for t in textures:
 		if t.tex_id == tex_id:
 			target = t
+	# print("Target: " + str(target))
 	
 	should_flip = (randint(0,100) >= 100 - FLIP_CHANCE)
 
@@ -173,6 +186,7 @@ def hammer_array():
 	global hammered_textures, hammered_arrays, arr_pages
 	target = None
 	tex_id = int(request.args.get('tex_id'));
+	print('hammert target', tex_id)
 	template = hammered_textures[tex_id]
 	if arr_pages == None:
 		arr_pages = frida_api.find_pages();

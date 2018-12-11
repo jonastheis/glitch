@@ -9,7 +9,7 @@ class Allocator {
     this.newKGSL = []
 
     this.textures = []
-    this.maxIdSearched = 0
+    this.offset = 0
   }
 
   async _init(safe) {
@@ -30,10 +30,13 @@ class Allocator {
     
     console.log(`[Allocator] ++ ${this.newKGSL.length} unique new textures found.`);
     if (this.newKGSL.length !== this.pages) {
-      this.clean()
-      console.warn(`[Allocator] wrong texture filters Expected [${this.pages}] != [Got ${this.newKGSL.length}]`)
-      console.warn(`[Allocator] Asusming that ${this.newKGSL.length} pages are created.`)
-      this.pages = this.newKGSL.length
+      console.warn(`[Allocator] wrong textures [Expected ${this.pages}] != [Got ${this.newKGSL.length}]`)
+      if (this.pages > this.newKGSL.length) {
+        console.log(`[Allocator] Ignoring..`)
+      }
+      else {
+        this.offset = (this.pages-this.newKGSL.length)
+      }
     }
 
     // modifies this.newKGSL
@@ -112,11 +115,11 @@ class Allocator {
 
   async allocate() {
     for (let i = 0; i < this.pages; i++) {
-      const t = createTexture2DRGBA(createUint8Array(KB4, 0), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
+      const t = createTexture2DRGBA(createUint8Array(KB4, i%256), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
       this.textures.push(t);
-      if (i % this.SLEEP == 0) {
-        console.debug(`[${i}/${this.pages}] pages created so far. Taking a short break.`);
-        await sleep(500);
+      if (i % this.SLEEP == 0 && i > 0) {
+        console.debug(`[Allocator] [${i}/${this.pages}] pages created so far. Taking a short break.`);
+        await sleep(1000);
         allocatePages(8 * PAGES_PER_MB)
       }
     }

