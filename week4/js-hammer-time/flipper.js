@@ -58,11 +58,20 @@ function flip_bit(v_addr, bit_to_flip) {
 	console.log("prev_val: " + prev_val + " new_val: " + Memory.readPointer(ptr(v_addr)));
 }
 
+function read_pointer(v_addr) {
+	return Memory.readPointer(ptr(v_addr));
+}
+
+function read_bytearray(v_addr) {
+	return Memory.readByteArray(ptr(v_addr), 4096)
+}
 
 
 rpc.exports = {
   findPages: find_pages,
-  flipBit: flip_bit
+	flipBit: flip_bit,
+	readPointer: read_pointer,
+	readBytearray: read_bytearray
 };
 
 

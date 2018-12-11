@@ -132,10 +132,24 @@ def get_tex_infos():
 	read_pagemap()
 	[tex.get_pfn() for tex in textures]
 	# pp.pprint(textures)
-	print("Done.")
 	return json.dumps([tex.__dict__ for tex in textures])
 
-	
+
+
+@app.route('/read_ptr')
+def read_ptr():
+	val = frida_api.read_pointer(request.args.get('vaddr'))
+	if len(val) == 9: val = "0x0" + val[2:]
+	return json.dumps({'ptr': val, 'val': int(val[2:4], 16)})
+
+@app.route('/read_texture')
+def read_texture():
+	# tex_val = []
+	# for i in range(1024):
+	# 	val = frida_api.read_pointer(request.args.get('vaddr'))	
+	# 	tex_val.append(val)
+	tex_val = frida_api.read_bytearray(request.args.get('vaddr'))
+	return json.dumps({'tex': list(bytearray(tex_val)) })
 
 
 @app.route('/hammer_tex')

