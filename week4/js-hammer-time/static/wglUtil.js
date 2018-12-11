@@ -126,7 +126,7 @@ async function checkForFlip(texture) {
 async function doubleCheckForFlip(kgsl_tex) {
   // attach the texture as the first color attachment
 
-  var pixels = await readTexture(kgsl_tex.v_addr);
+  var pixels = (await readTexture(kgsl_tex.v_addr)).tex;
   for (let i = 0; i < KB4; i++) {
     if (pixels[i] != 0xFF) {
       console.log(`++++ BIT FLIP IDENTIFIED`);
@@ -142,13 +142,14 @@ async function doubleCheckForFlip(kgsl_tex) {
 
 function fillTexture(texture, fill=0x00) {
   let data;
-  if (fill == 0x00) {
-    data = ARRAY_UINT8_0;
-  } else if(fill == 0xFF) {
-    data = ARRAY_UINT8_1;
-  } else {
-    data = createUint8Array(KB4, fill);
-  }
+  // if (fill == 0x00) {
+  //   data = ARRAY_UINT8_0;
+  // } else if(fill == 0xFF) {
+  //   data = ARRAY_UINT8_1;
+  // } else {
+  //   data = createUint8Array(KB4, fill);
+  // }
+  data = createUint8Array(KB4, fill);
   
   // write special values to texture
   gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -212,7 +213,6 @@ function xNumber(num, gap) {
   let f = new Float64Array(1)
   f[0] = num
   let ua = new Uint8Array(f.buffer).reverse()
-  // let v = new DataView(f.buffer) could also be used
   let ret = ''
   for (let i = 0 ; i < ua.byteLength; i++) {
     ret += ua[i].toString(16)
@@ -221,11 +221,11 @@ function xNumber(num, gap) {
   return gap ? `0x${ret.substr(0, 8)} ${ret.substr(8, 16)}` : `0x${ret}`
 }
 
-async readTexture(vaddr) {
+async function readTexture(vaddr) {
   return await fetch('read_texture?vaddr=' + vaddr).then(data => data.json())
 }
 
-async readPtr(vaddr) {
+async function readPtr(vaddr) {
   return await fetch('read_ptr?vaddr=' + vaddr).then(data => data.json())
 }
 

