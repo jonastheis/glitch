@@ -48,7 +48,7 @@ async function hammerTime(contMem) {
 
 
     // fill textures for hammering
-    for (let row = 0; row < 16; row += 16) {
+    for (let row = 0; row <= 16; row += 16) {
         for (let localOffset = 0; localOffset < 16; localOffset += 2) {
             let offset = row + localOffset;
             // fill textures in row n-1, n+1 with 0
@@ -71,8 +71,7 @@ async function hammerTime(contMem) {
     await sleep(500);
 
     // hammer row 0 and row 1
-    // TODO: also execute for row 1 (<=16)
-    for (let row = 0; row < 16; row += 16) {
+    for (let row = 0; row <= 16; row += 16) {
         // console.log(`++ Prepare row [${row/16}] for hammer.`);
 
         // hammer every bank in a row
