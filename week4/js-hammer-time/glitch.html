@@ -38,7 +38,7 @@ void main() {
   uint val = 0u;
   ivec2 base = ivec2(0,0);
   ivec2 base32 = ivec2(0,2);
-  for (int i = 0; i < 2000000; i++) {
+  for (int i = 0; i < 5000000; i++) {
       val += texelFetch(HTex00, base, 0).r;
       val += texelFetch(HTex01, base, 0).r;
       val += texelFetch(HTex02, base, 0).r;
@@ -75,41 +75,11 @@ precision mediump float;
 precision mediump usampler2D;
 
 out vec4 FragColor;
-in float value;
-
-uniform usampler2D HTex00;
-uniform usampler2D HTex01;
-uniform usampler2D HTex02;
-uniform usampler2D HTex03;
-uniform usampler2D HTex04;
-uniform usampler2D HTex05;
-uniform usampler2D HTex06;
-uniform usampler2D HTex07;
-uniform usampler2D HTex08;
-
-uniform int bank0;
-uniform int bank1;
 
 void main(){
   FragColor = vec4(.5,.5,.5,.5);
-
-  /*FragColor = vec4(
-    0.1,
-    float(bank0) / 255.0,
-    float(bank1) / 255.0,
-    value
-  );
-  FragColor = vec4(
-    texelFetch(HTex00, ivec2(0), 0).r,
-    texelFetch(HTex02, ivec2(0), 0).r,
-    texelFetch(HTex04, ivec2(0), 0).r,
-    texelFetch(HTex06, ivec2(0), 0).r
-  );*/
 }
     </script>
-  <!-- <script src="static/jquery-3.3.1.min.js"></script> -->
-  <!-- <script src="static/wglSetup.js"></script> -->
-  <!-- <script src="static/adbApi.js"></script> -->
   <script src="static/wglUtil.js"></script>
   <script src="static/wglShader.js"></script>
   <script src="static/allocator.js"></script>
