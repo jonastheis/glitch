@@ -56,6 +56,13 @@ async function glitch() {
     // initDebug();
     // gl.drawArrays(gl.TRIANGLES, 0, 6);
     // viewFramebuffer();
+
+    // DEBUG information
+    var available_extensions = gl.getSupportedExtensions();
+    console.log(available_extensions);
+    const ext = gl.getExtension('WEBGL_debug_shaders');
+    console.log(ext.getTranslatedShaderSource(shader.vertexShader));
+    console.log(ext.getTranslatedShaderSource(shader.fragmentShader));
 }
 
 async function hammerTime(contMem, _row) {

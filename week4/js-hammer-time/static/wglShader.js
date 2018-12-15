@@ -3,10 +3,10 @@ class Shader {
     const vertexShaderSource = document.getElementById(vertexShaderId).text;
     const fragmentShaderSource = document.getElementById(fragmentShaderId).text;
 
-    const vertexShader = this.createShader(gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+    this.vertexShader = this.createShader(gl.VERTEX_SHADER, vertexShaderSource);
+    this.fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    this.id = this.createProgram(vertexShader, fragmentShader);
+    this.id = this.createProgram(this.vertexShader, this.fragmentShader);
   }
 
   createShader(type, source) {
